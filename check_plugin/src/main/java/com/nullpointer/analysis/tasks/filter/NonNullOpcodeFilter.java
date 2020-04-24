@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.CONST_TYPE;
 import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;
 import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.INVOKE_TYPE;
 import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.LDC_TYPE;
@@ -102,6 +103,7 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
                         break;
                     case LDC_TYPE:
                     case VARIABLE_TYPE:
+                    case CONST_TYPE:
                         currOpcode = AnalyserUtil.getBeforeOpcodeInfo(mOpcodeInfo, currOpcode.offset);
                         dealCount--;
                         break;

@@ -6,6 +6,7 @@ import com.nullpointer.analysis.bean.OpcodeInfoItem;
 import org.objectweb.asm.Opcodes;
 
 import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.CAST_TYPE;
+import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.CONST_TYPE;
 import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;
 import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.INVOKE_TYPE;
 import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.LDC_TYPE;
@@ -63,6 +64,10 @@ public class AnalyserUtil {
 
         if (opcode == Opcodes.LDC || opcode == Opcodes.GETSTATIC) {
             return LDC_TYPE;
+        }
+
+        if (opcode >= Opcodes.ACONST_NULL && opcode <= Opcodes.DCONST_1) {
+            return CONST_TYPE;
         }
 
         //todo @guizhihong 强转指令没有缓存相关信息，需要进一步check
