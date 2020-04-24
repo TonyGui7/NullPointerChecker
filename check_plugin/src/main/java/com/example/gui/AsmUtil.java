@@ -20,8 +20,6 @@ public class AsmUtil {
     private AsmUtil() {
     }
 
-    ;
-
     private static AsmUtil mInstance;
 
     public static synchronized AsmUtil getInstance() {

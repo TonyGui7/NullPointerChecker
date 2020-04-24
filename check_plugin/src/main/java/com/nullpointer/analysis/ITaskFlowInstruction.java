@@ -28,11 +28,11 @@ public interface ITaskFlowInstruction {
 
     interface IOpcodeAnalyser<AInput, AOutput> extends TaskContract.SimpleTask<AInput, AOutput> {
 
-        @interface BaseRef {
+        @interface IntRef {
             int[] ref();
         }
 
-        @BaseRef(ref = {INVOKE_TYPE, FIELD_TYPE, VARIABLE_TYPE, CAST_TYPE, LDC_TYPE})
+        @IntRef(ref = {INVOKE_TYPE, FIELD_TYPE, VARIABLE_TYPE, CAST_TYPE, LDC_TYPE})
         @interface OpcodeType {
         }
 
