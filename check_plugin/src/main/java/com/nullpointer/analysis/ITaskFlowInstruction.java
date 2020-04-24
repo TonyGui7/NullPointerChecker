@@ -32,7 +32,7 @@ public interface ITaskFlowInstruction {
             int[] ref();
         }
 
-        @IntRef(ref = {INVOKE_TYPE, FIELD_TYPE, VARIABLE_TYPE, CAST_TYPE, LDC_TYPE})
+        @IntRef(ref = {INVOKE_TYPE, FIELD_TYPE, VARIABLE_TYPE, CAST_TYPE, LDC_TYPE, RETURN_TYPE})
         @interface OpcodeType {
         }
 
@@ -41,6 +41,7 @@ public interface ITaskFlowInstruction {
         int VARIABLE_TYPE = 3;
         int CAST_TYPE = 4;
         int LDC_TYPE = 5;
+        int RETURN_TYPE = 6;
 
         interface IAtomicOpcodeAnalyser<AInput, AOutput> extends TaskContract.AtomicTask<AInput, AOutput> {
 

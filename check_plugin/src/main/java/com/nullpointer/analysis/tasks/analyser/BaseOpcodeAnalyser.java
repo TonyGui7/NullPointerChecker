@@ -85,6 +85,11 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
             return;
         }
 
+        OpcodeInfoItem returnOpcode = AnalyserUtil.getBeforeOpcodeInfo(mOpcodeInfo, jumpOffset);
+        if (returnOpcode == null || AnalyserUtil.classifyOpcode(returnOpcode.opcode) != ITaskFlowInstruction.IOpcodeAnalyser.RETURN_TYPE) {
+            return;
+        }
+
         analyseSpecificTypeOpcodes(checkNullOpcodeInfo, jumpOffset, isIfNull);
     }
 

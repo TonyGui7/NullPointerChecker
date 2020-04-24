@@ -9,6 +9,7 @@ import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.CAST
 import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;
 import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.INVOKE_TYPE;
 import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.LDC_TYPE;
+import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.RETURN_TYPE;
 import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
 
 /**
@@ -67,6 +68,10 @@ public class AnalyserUtil {
         //todo @guizhihong 强转指令没有缓存相关信息，需要进一步check
         if (opcode == Opcodes.CHECKCAST || opcode == Opcodes.INSTANCEOF) {
             return CAST_TYPE;
+        }
+
+        if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) {
+            return RETURN_TYPE;
         }
 
         return 0;
