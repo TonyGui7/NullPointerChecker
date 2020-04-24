@@ -176,6 +176,7 @@ public class AsmClassVisitor extends ClassVisitor {
         public void visitTypeInsn(int opcode, String type) {
             if (mByteCodeParser != null) {
                 mByteCodeParser.cacheGeneralByteCodeInfo(opcode, mCurrentBycodeOffset);
+                mByteCodeParser.cacheInstanceOfOpcodeInfo(mCurrentBycodeOffset, opcode, type);
                 mCurrentBycodeOffset = mByteCodeParser.parseOpcodeOffset(opcode, mCurrentBycodeOffset);
             }
             super.visitTypeInsn(opcode, type);

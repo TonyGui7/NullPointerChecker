@@ -44,6 +44,8 @@ public class ByteCodeParser implements IOpcodesParser {
 
     private HashMap<Integer, FieldOpcodeInfo> mFieldOpcodeInfoMap;
 
+    private HashMap<Integer, InstanceOfOpcodeInfo> mInstanceOfOpcodeInfoMap;
+
     /**
      * 存储所有字节码指令及其对应的字节偏移量（相对当前栈帧）
      * key是当前指令字节偏移量
@@ -72,6 +74,7 @@ public class ByteCodeParser implements IOpcodesParser {
         mInvokeOpcodeInfoMap = new HashMap<>();
         mVarOpcodeInfoMap = new HashMap<>();
         mFieldOpcodeInfoMap = new HashMap<>();
+        mInstanceOfOpcodeInfoMap = new HashMap<>();
 
         if (mListener != null) {
             mListener.onParseStart();
@@ -88,6 +91,7 @@ public class ByteCodeParser implements IOpcodesParser {
         opcodeInfo.varOpcodeInfoHashMap = mVarOpcodeInfoMap;
         opcodeInfo.fieldOpcodeInfoHashMap = mFieldOpcodeInfoMap;
         opcodeInfo.invokeOpcodeInfoHashMap = mInvokeOpcodeInfoMap;
+        opcodeInfo.instanceOfOpcodeInfoHashMap = mInstanceOfOpcodeInfoMap;
 
         arrangeJumpOpcodeInfo();
         opcodeInfo.jumpOpcodeInfoMap = mJumpOpcodeLabelInfo;
@@ -518,6 +522,14 @@ public class ByteCodeParser implements IOpcodesParser {
         mVarOpcodeInfoMap.put(offset, new VarOpcodeInfo(opcode, var));
     }
 
+    public void cacheInstanceOfOpcodeInfo(int offset, int opcode, String type) {
+        if (mInstanceOfOpcodeInfoMap == null) {
+            return;
+        }
+
+        mInstanceOfOpcodeInfoMap.put(offset, new InstanceOfOpcodeInfo(opcode, type));
+    }
+
     public void cacheFieldOpcodeInfo(int offset, int opcode, String owner, String name, String descriptor) {
         if (mFieldOpcodeInfoMap == null) {
             return;
@@ -547,6 +559,8 @@ public class ByteCodeParser implements IOpcodesParser {
 
         private HashMap<Integer, Integer> lineNumberTable;
 
+        private HashMap<Integer, InstanceOfOpcodeInfo> instanceOfOpcodeInfoHashMap;
+
         public String getCurrClzzName() {
             return currClzzName;
         }
@@ -575,6 +589,10 @@ public class ByteCodeParser implements IOpcodesParser {
             return fieldOpcodeInfoHashMap;
         }
 
+        public HashMap<Integer, InstanceOfOpcodeInfo> getInstanceOfOpcodeInfoHashMap() {
+            return instanceOfOpcodeInfoHashMap;
+        }
+
         public HashMap<Integer, Integer> getLineNumberTable() {
             return lineNumberTable;
         }
@@ -585,7 +603,7 @@ public class ByteCodeParser implements IOpcodesParser {
     }
 
 
-    public class GeneralOpcodeInfo extends BaseOpcodeInfo {
+    public class GeneralOpcodeInfo {
         //指令字节偏移量
         private List<Integer> opcodeOffsetList;
 
@@ -607,7 +625,6 @@ public class ByteCodeParser implements IOpcodesParser {
     }
 
     public class InvokeOpcodeInfo extends BaseOpcodeInfo {
-        public int opcode;
         public String owner;
         public String name;
         public String descriptor;
@@ -659,7 +676,6 @@ public class ByteCodeParser implements IOpcodesParser {
     }
 
     public class VarOpcodeInfo extends BaseOpcodeInfo {
-        public int opcode;
         public int var;
 
         public VarOpcodeInfo(int opcode, int var) {
@@ -691,9 +707,6 @@ public class ByteCodeParser implements IOpcodesParser {
     }
 
     public class JumpOpcodeInfo extends BaseOpcodeInfo {
-        //跳转指令字节偏移量
-        public int opcode;
-
         Label label;
 
         //跳转指令满足条件跳转目标指令的字节偏移量
@@ -716,7 +729,6 @@ public class ByteCodeParser implements IOpcodesParser {
     }
 
     public class FieldOpcodeInfo extends BaseOpcodeInfo {
-        public int opcode;
         @NonNull
         public String owner;
         @NonNull
@@ -762,7 +774,40 @@ public class ByteCodeParser implements IOpcodesParser {
         }
     }
 
+    public class InstanceOfOpcodeInfo extends BaseOpcodeInfo {
+        public String type;
+
+        public InstanceOfOpcodeInfo(int opcode, String type) {
+            this.opcode = opcode;
+            this.type = type;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (!(object instanceof InstanceOfOpcodeInfo)) {
+                return false;
+            }
+
+            InstanceOfOpcodeInfo instanceOfOpcodeInfo = (InstanceOfOpcodeInfo) object;
+            if (instanceOfOpcodeInfo == this) {
+                return true;
+            }
+
+            if (this.opcode != instanceOfOpcodeInfo.opcode) {
+                return false;
+            }
+
+            if (!this.type.equals(instanceOfOpcodeInfo.opcode)) {
+                return false;
+            }
+
+            return true;
+        }
+
+    }
+
     public class BaseOpcodeInfo {
+        public int opcode;
     }
 
 }

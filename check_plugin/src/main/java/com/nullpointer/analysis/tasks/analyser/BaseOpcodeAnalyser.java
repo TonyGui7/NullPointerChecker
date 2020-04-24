@@ -47,6 +47,16 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
             return;
         }
 
+        analyseJumpOpcodeCase();
+        analyseInstanceOfOpcodeCase();
+        end();
+    }
+
+    private void analyseJumpOpcodeCase() {
+        if (mOpcodeInfo == null) {
+            end();
+            return;
+        }
         HashMap<Integer, ByteCodeParser.JumpOpcodeInfo> jumpOpcodeInfoHashMap = mOpcodeInfo.getJumpOpcodeInfoList();
         List<Integer> jumpOpcodeOffsetList = new ArrayList<>(jumpOpcodeInfoHashMap.keySet());
         Collections.sort(jumpOpcodeOffsetList);
@@ -55,15 +65,40 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
             ByteCodeParser.JumpOpcodeInfo targetJumpOpcodeInfo = jumpOpcodeInfoHashMap.get(targetOffset);
             analyseJumpOpcode(targetOffset, targetJumpOpcodeInfo);
         }
-        end();
     }
 
-    //todo @guizhihong instanceof和checkCast指令的分析
-    private void analyseJumpOpcode(int targetOffset, ByteCodeParser.JumpOpcodeInfo targetJumpInfo) {
-        switch (targetJumpInfo.opcode) {
+    private void analyseInstanceOfOpcodeCase() {
+        if (mOpcodeInfo == null) {
+            end();
+            return;
+        }
+        HashMap<Integer, ByteCodeParser.InstanceOfOpcodeInfo> instanceOfOpcodeInfoHashMap = mOpcodeInfo.getInstanceOfOpcodeInfoHashMap();
+        if (instanceOfOpcodeInfoHashMap == null || instanceOfOpcodeInfoHashMap.isEmpty()) {
+            end();
+            return;
+        }
+
+        List<Integer> instanceOfOpcodeOffsetList = new ArrayList<>(instanceOfOpcodeInfoHashMap.keySet());
+        Collections.sort(instanceOfOpcodeOffsetList);
+        for (int index = 0; index < instanceOfOpcodeOffsetList.size(); index++) {
+            int targetOffset = instanceOfOpcodeOffsetList.get(index);
+            ByteCodeParser.InstanceOfOpcodeInfo instanceOfOpcodeInfo = instanceOfOpcodeInfoHashMap.get(targetOffset);
+            analyseJumpOpcode(targetOffset, instanceOfOpcodeInfo);
+        }
+    }
+
+    private void analyseJumpOpcode(int targetOffset, ByteCodeParser.BaseOpcodeInfo checkNullOpcodeInfo) {
+        switch (checkNullOpcodeInfo.opcode) {
             case Opcodes.IFNULL:
             case Opcodes.IFNONNULL:
-                analyseNullChecker(targetOffset, targetJumpInfo.jumpTargetOffset, targetJumpInfo.opcode == Opcodes.IFNULL);
+                if (checkNullOpcodeInfo instanceof ByteCodeParser.JumpOpcodeInfo) {
+                    analyseNullChecker(targetOffset, ((ByteCodeParser.JumpOpcodeInfo) checkNullOpcodeInfo).jumpTargetOffset, checkNullOpcodeInfo.opcode == Opcodes.IFNULL);
+                }
+                break;
+            case Opcodes.INSTANCEOF:
+                if (checkNullOpcodeInfo instanceof ByteCodeParser.InstanceOfOpcodeInfo) {
+                    analyseInstanceOfOpcode(targetOffset);
+                }
                 break;
             default:
                 break;
@@ -91,6 +126,32 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
         }
 
         analyseSpecificTypeOpcodes(checkNullOpcodeInfo, jumpOffset, isIfNull);
+    }
+
+    private void analyseInstanceOfOpcode(int targetOffset) {
+        OpcodeInfoItem checkNullOpcodeInfo = AnalyserUtil.getBeforeOpcodeInfo(mOpcodeInfo, targetOffset);
+        if (checkNullOpcodeInfo == null) {
+            return;
+        }
+
+        OpcodeInfoItem eqOpcodeInfo = AnalyserUtil.getAfterOpcodeInfo(mOpcodeInfo, targetOffset);
+        if (eqOpcodeInfo.opcode != Opcodes.IFEQ && eqOpcodeInfo.opcode != Opcodes.IFNE) {
+            return;
+        }
+        boolean isIfNull = eqOpcodeInfo.opcode == Opcodes.IFEQ;
+        HashMap<Integer, ByteCodeParser.JumpOpcodeInfo> jumpOpcodeInfoHashMap = mOpcodeInfo.getJumpOpcodeInfoList();
+        if (jumpOpcodeInfoHashMap == null || jumpOpcodeInfoHashMap.isEmpty()) {
+            return;
+        }
+
+        int jumpTargetOffset = jumpOpcodeInfoHashMap.get(eqOpcodeInfo.offset).jumpTargetOffset;
+
+        OpcodeInfoItem returnOpcode = AnalyserUtil.getBeforeOpcodeInfo(mOpcodeInfo, jumpTargetOffset);
+        if (returnOpcode == null || AnalyserUtil.classifyOpcode(returnOpcode.opcode) != ITaskFlowInstruction.IOpcodeAnalyser.RETURN_TYPE) {
+            return;
+        }
+
+        analyseSpecificTypeOpcodes(checkNullOpcodeInfo, jumpTargetOffset, isIfNull);
     }
 
     protected void analyseSpecificTypeOpcodes(OpcodeInfoItem checkNullOpcode, int jumpOffset, boolean isIfNull) {

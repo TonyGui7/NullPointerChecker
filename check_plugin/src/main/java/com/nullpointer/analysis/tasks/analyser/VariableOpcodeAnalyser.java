@@ -36,7 +36,7 @@ public class VariableOpcodeAnalyser extends BaseOpcodeAnalyser {
 
         int startIndex = isIfNull ? offsetList.indexOf(checkNullOpcode.offset) + 1 : getOpcodeIndexGreaterThan(jumpOffset, offsetList);
         int endIndex = isIfNull ? getOpcodeIndexLessThan(jumpOffset, offsetList) : offsetList.size();
-        if (startIndex > endIndex || startIndex < 0 || endIndex < offsetList.size()) {
+        if (startIndex > endIndex || startIndex < 0 || endIndex > offsetList.size()) {
             return;
         }
 

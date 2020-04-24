@@ -36,7 +36,7 @@ public class InvokeOpcodeAnalyser extends BaseOpcodeAnalyser {
 
         int startIndex = isIfNull ? invokeOffsetList.indexOf(checkNullOpcode.offset) + 1 : getOpcodeIndexGreaterThan(jumpOffset, invokeOffsetList);
         int endIndex = isIfNull ? getOpcodeIndexLessThan(jumpOffset, invokeOffsetList) : invokeOffsetList.size();
-        if (startIndex > endIndex || startIndex < 0 || endIndex < invokeOffsetList.size()) {
+        if (startIndex > endIndex || startIndex < 0 || endIndex > invokeOffsetList.size()) {
             return;
         }
 

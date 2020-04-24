@@ -41,6 +41,29 @@ public class AnalyserUtil {
         return result;
     }
 
+
+    public static OpcodeInfoItem getAfterOpcodeInfo(ByteCodeParser.OpcodeInfo opcodeInfo, int targetOffset) {
+        if (opcodeInfo == null || opcodeInfo.getGeneralOpcodeInfo() == null) {
+            return null;
+        }
+
+        ByteCodeParser.GeneralOpcodeInfo generalOpcodeInfo = opcodeInfo.getGeneralOpcodeInfo();
+        if (generalOpcodeInfo.getOpcodeList() == null || generalOpcodeInfo.getOpcodeOffsetList() == null) {
+            return null;
+        }
+
+        int targetIndex = generalOpcodeInfo.getOpcodeOffsetList().indexOf(targetOffset);
+        if (targetIndex + 1 < 0 || targetIndex + 1 > generalOpcodeInfo.getOpcodeList().size() - 1) {
+            return null;
+        }
+
+        OpcodeInfoItem result = new OpcodeInfoItem();
+        result.offset = generalOpcodeInfo.getOpcodeOffsetList().get(targetIndex + 1);
+        result.opcode = generalOpcodeInfo.getOpcodeList().get(targetIndex + 1);
+        return result;
+    }
+
+
     public static OpcodeInfoItem constructOpcodeInfoItem(int opcode, int offset) {
         OpcodeInfoItem opcodeInfoItem = new OpcodeInfoItem();
         opcodeInfoItem.opcode = opcode;
