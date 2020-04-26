@@ -16,6 +16,7 @@ import java.util.List;
  * </>
  *
  * <p>
+ * {@link IBytecodeParser} 字节码解析器接口，任务流的入口，借助Asm解析出判空需要的字节码信息
  * {@link IOpcodeFilter} 过滤器接口， 过滤出需要进行空指针检测分析的字节码指令集
  * {@link IOpcodeAnalyser} 空指针分析器接口，接受过滤器输出的数据进行空指针分析
  * {@link IOpcodeTranslator} 空指针信息翻译器接口，接受分析器输出的字节码信息，将其翻译成java源码层级的信息，以便阅读
