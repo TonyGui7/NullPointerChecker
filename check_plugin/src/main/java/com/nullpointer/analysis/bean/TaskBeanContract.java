@@ -1,6 +1,6 @@
 package com.nullpointer.analysis.bean;
 
-import com.example.gui.ByteCodeParser;
+import com.bytecode.parser.ByteCodeParser;
 
 import java.util.List;
 

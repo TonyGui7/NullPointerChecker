@@ -1,4 +1,4 @@
-package com.example.gui;
+package com.bytecode.parser;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Label;

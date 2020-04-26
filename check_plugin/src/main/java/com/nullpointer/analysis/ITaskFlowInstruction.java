@@ -1,6 +1,6 @@
 package com.nullpointer.analysis;
 
-import com.example.gui.ByteCodeParser;
+import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.TaskBeanContract;
 
 /**

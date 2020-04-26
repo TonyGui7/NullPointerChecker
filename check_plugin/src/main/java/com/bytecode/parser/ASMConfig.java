@@ -1,4 +1,4 @@
-package com.example.gui;
+package com.bytecode.parser;
 
 public class ASMConfig {
     public static String CLASS_NAME = "TextUtil";

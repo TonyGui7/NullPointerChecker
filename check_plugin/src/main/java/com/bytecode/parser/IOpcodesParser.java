@@ -1,4 +1,5 @@
-package com.example.gui;
+package com.bytecode.parser;
+
 /**
  * 通过Asm来解析所需的字节码信息接口
  *

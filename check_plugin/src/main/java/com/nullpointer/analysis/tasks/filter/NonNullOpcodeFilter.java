@@ -2,7 +2,7 @@ package com.nullpointer.analysis.tasks.filter;
 
 import com.android.annotations.NonNull;
 import com.nullpointer.analysis.tools.ClassUtil;
-import com.example.gui.ByteCodeParser;
+import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
 import com.nullpointer.analysis.ITaskFlowInstruction;
 import com.nullpointer.analysis.bean.output.SimpleTaskOutput;

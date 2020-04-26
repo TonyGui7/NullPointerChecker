@@ -1,7 +1,7 @@
 package com.nullpointer.analysis;
 
-import com.example.gui.ByteCodeParser;
-import com.example.gui.IOpcodesParser;
+import com.bytecode.parser.ByteCodeParser;
+import com.bytecode.parser.IOpcodesParser;
 import com.nullpointer.analysis.bean.TaskBeanContract;
 
 /**

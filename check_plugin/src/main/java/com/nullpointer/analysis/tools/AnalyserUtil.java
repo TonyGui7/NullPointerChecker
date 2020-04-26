@@ -1,6 +1,6 @@
 package com.nullpointer.analysis.tools;
 
-import com.example.gui.ByteCodeParser;
+import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
 
 import org.objectweb.asm.Opcodes;
