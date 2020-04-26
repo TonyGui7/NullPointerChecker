@@ -54,6 +54,7 @@ public interface ITaskFlowInstruction {
         int LDC_TYPE = 5;
         int RETURN_TYPE = 6;
         int CONST_TYPE = 7;
+        int NEW_TYPE = 8;
 
         interface IAtomicOpcodeAnalyser<AInput, AOutput> extends TaskContract.AtomicTask<AInput, AOutput> {
 

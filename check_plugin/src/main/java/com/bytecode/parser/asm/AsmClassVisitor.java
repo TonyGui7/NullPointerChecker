@@ -1,5 +1,8 @@
-package com.bytecode.parser;
+package com.bytecode.parser.asm;
 
+
+import com.bytecode.parser.ByteCodeParser;
+import com.bytecode.parser.IOpcodesParser;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
@@ -49,7 +52,6 @@ public class AsmClassVisitor extends ClassVisitor {
         FieldVisitor fv = cv.visitField(access, name, descriptor, signature, value);
         fv = new AsmFieldVisitor(Opcodes.ASM5);
         return fv;
-
     }
 
     @Override
@@ -57,10 +59,11 @@ public class AsmClassVisitor extends ClassVisitor {
         MethodVisitor mv = cv.visitMethod(access, name, desc, signature,
                 exceptions);
         //Base类中有两个方法：无参构造以及process方法，这里不增强构造方法
-        if (ASMConfig.TARGET_METHOD_NAME.equals(name) && ASMConfig.TARGET_METHOD_DESC1.equals(desc) && mv != null) {
-            mv = new AsmMethodVisitor(mv, mClassName, name, mListener);
-        }
-        return mv;
+//        if (ASMConfig.TARGET_METHOD_NAME.equals(name) && ASMConfig.TARGET_METHOD_DESC1.equals(desc) && mv != null) {
+//            mv = new AsmMethodVisitor(mv, mClassName, name, mListener);
+//        }
+        return new AsmMethodVisitor(mv, mClassName, name, mListener);
+//        return mv;
     }
 
     @Override

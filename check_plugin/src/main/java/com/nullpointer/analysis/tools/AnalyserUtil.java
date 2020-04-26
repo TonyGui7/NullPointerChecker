@@ -2,6 +2,7 @@ package com.nullpointer.analysis.tools;
 
 import com.CommonOpcodeAnalysisItem;
 import com.bytecode.parser.ByteCodeParser;
+import com.bytecode.parser.IOpcodesParser;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
 
 import org.objectweb.asm.Opcodes;
@@ -13,6 +14,7 @@ import static com.ITaskFlowInstruction.IOpcodeAnalyser.CONST_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.INVOKE_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.LDC_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.NEW_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.RETURN_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
 
@@ -82,7 +84,8 @@ public class AnalyserUtil {
     }
 
     public static int classifyOpcode(int opcode) {
-        if (opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKESPECIAL || opcode == Opcodes.INVOKEINTERFACE) {
+        //TODO @guizhihong invokeDynamic指令
+        if (opcode >= Opcodes.INVOKEVIRTUAL && opcode <= Opcodes.INVOKEINTERFACE) {
             return INVOKE_TYPE;
         }
 
@@ -92,6 +95,10 @@ public class AnalyserUtil {
 
         //todo @guizhihong 加载局部变量的指令不止这些，需要进一步排查
         if (opcode >= Opcodes.ILOAD && opcode <= Opcodes.ALOAD) {
+            return VARIABLE_TYPE;
+        }
+
+        if (opcode >= IOpcodesParser.ILOAD_0 && opcode <= IOpcodesParser.ALOAD_3) {
             return VARIABLE_TYPE;
         }
 
@@ -112,7 +119,18 @@ public class AnalyserUtil {
             return RETURN_TYPE;
         }
 
+        if (opcode == Opcodes.NEW || opcode ==Opcodes.NEWARRAY || opcode == Opcodes.ANEWARRAY) {
+            return NEW_TYPE;
+        }
+
         return 0;
+    }
+
+    public static boolean isInvokeInit(ByteCodeParser.InvokeOpcodeInfo invokeOpcodeInfo) {
+        if (invokeOpcodeInfo == null) {
+            return false;
+        }
+        return "<init>".equals(invokeOpcodeInfo.name);
     }
 
 

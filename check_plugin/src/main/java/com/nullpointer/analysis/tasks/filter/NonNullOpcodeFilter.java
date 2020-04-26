@@ -47,12 +47,13 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
 
         for (Integer offset : infoHashMap.keySet()) {
             ByteCodeParser.InvokeOpcodeInfo invokeOpcodeInfo = infoHashMap.get(offset);
-            if (invokeOpcodeInfo.opcode == Opcodes.INVOKESTATIC || invokeOpcodeInfo.opcode == Opcodes.INVOKEDYNAMIC) {
+            if (invokeOpcodeInfo.opcode == Opcodes.INVOKESTATIC || invokeOpcodeInfo.opcode == Opcodes.INVOKEDYNAMIC || invokeOpcodeInfo.opcode == Opcodes.INVOKESPECIAL) {
                 continue;
             }
             OpcodeInfoItem targetOffset = getTargetObjectOffset(offset, invokeOpcodeInfo, opcodeInfo);
 
-            if (isSelfOpcode(targetOffset.offset, opcodeInfo)) {
+            //调用对象是当前class对象 或者 是直接new的对象调用，这两种情况不用判空
+            if (isSelfOpcode(targetOffset.offset, opcodeInfo) || AnalyserUtil.isInvokeInit(infoHashMap.get(targetOffset.offset))) {
                 continue;
             }
             result.add(targetOffset);
@@ -96,24 +97,30 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
                 switch (AnalyserUtil.classifyOpcode(currOpcode.opcode)) {
                     case FIELD_TYPE:
                         currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset).offset);
-                        dealCount--;
                         break;
                     case LDC_TYPE:
                     case VARIABLE_TYPE:
                     case CONST_TYPE:
                         currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset);
-                        dealCount--;
                         break;
                     case INVOKE_TYPE:
-                        while (AnalyserUtil.classifyOpcode(currOpcode.opcode) == INVOKE_TYPE) {
-                            currOpcode = getTargetObjectOffset(currOpcode.offset, infoHashMap.get(currOpcode.offset), opcodeInfo);
+                        if (currOpcode.opcode == Opcodes.INVOKESPECIAL) {
+                            if (AnalyserUtil.isInvokeInit(infoHashMap.get(currOpcode.offset))) {
+                                currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset).offset);
+                            } else {
+                                currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset);
+                            }
+                        } else {
+                            while (AnalyserUtil.classifyOpcode(currOpcode.opcode) == INVOKE_TYPE) {
+                                currOpcode = getTargetObjectOffset(currOpcode.offset, infoHashMap.get(currOpcode.offset), opcodeInfo);
+                            }
                         }
                         currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset);
-                        dealCount--;
                         break;
                     default:
                         break;
                 }
+                dealCount--;
             }
             result = currOpcode;
         }
