@@ -1,4 +1,4 @@
-package com.example.pluginexplore
+package com.example.npchecker
 
 import com.android.annotations.NonNull
 import com.android.build.api.transform.DirectoryInput
@@ -16,7 +16,7 @@ import org.apache.commons.io.FileUtils
 
 import java.util.function.Consumer
 
-class ExploreTransform extends Transform{
+class ByteCodeReaderTransform extends Transform{
 
     @Override
     public String getName() {
