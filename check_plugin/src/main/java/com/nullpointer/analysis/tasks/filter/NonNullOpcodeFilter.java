@@ -1,5 +1,6 @@
 package com.nullpointer.analysis.tasks.filter;
 
+import com.CommonOpcodeAnalysisItem;
 import com.android.annotations.NonNull;
 import com.nullpointer.analysis.tools.ClassUtil;
 import com.bytecode.parser.ByteCodeParser;
@@ -27,48 +28,44 @@ import static com.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
  * @author guizhihong
  */
 public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<TaskBeanContract.ISimpleTaskInput, TaskBeanContract.ISimpleTaskOutput> {
-    private ByteCodeParser.OpcodeInfo mOpcodeInfo;
-    private List<OpcodeInfoItem> mFilteredResult;
+    private List<ByteCodeParser.OpcodeInfo> mOpcodeInfoList;
+    private List<CommonOpcodeAnalysisItem> mFilterdResults;
     private Listener<TaskBeanContract.ISimpleTaskOutput> mListener;
 
     @Override
-    public void filter(ByteCodeParser.OpcodeInfo opcodeInfo) {
-        filterInvokeOpcodeInfo();
+    public List<OpcodeInfoItem> filter(ByteCodeParser.OpcodeInfo opcodeInfo) {
+        return filterInvokeOpcodeInfo(opcodeInfo);
     }
 
-    private void filterInvokeOpcodeInfo() {
-        if (mOpcodeInfo == null || mOpcodeInfo.getInvokeOpcodeInfoHashMap() == null) {
-            end();
-            return;
+    private List<OpcodeInfoItem> filterInvokeOpcodeInfo(ByteCodeParser.OpcodeInfo opcodeInfo) {
+        List<OpcodeInfoItem> result = new ArrayList<>();
+        if (opcodeInfo == null || opcodeInfo.getInvokeOpcodeInfoHashMap() == null) {
+            return result;
         }
 
-        HashMap<Integer, ByteCodeParser.InvokeOpcodeInfo> infoHashMap = mOpcodeInfo.getInvokeOpcodeInfoHashMap();
+        HashMap<Integer, ByteCodeParser.InvokeOpcodeInfo> infoHashMap = opcodeInfo.getInvokeOpcodeInfoHashMap();
 
-
-        if (mFilteredResult == null) {
-            mFilteredResult = new ArrayList<>();
-        }
         for (Integer offset : infoHashMap.keySet()) {
             ByteCodeParser.InvokeOpcodeInfo invokeOpcodeInfo = infoHashMap.get(offset);
             if (invokeOpcodeInfo.opcode == Opcodes.INVOKESTATIC || invokeOpcodeInfo.opcode == Opcodes.INVOKEDYNAMIC) {
                 continue;
             }
-            OpcodeInfoItem targetOffset = getTargetObjectOffset(offset, invokeOpcodeInfo);
+            OpcodeInfoItem targetOffset = getTargetObjectOffset(offset, invokeOpcodeInfo, opcodeInfo);
 
-            if (isSelfOpcode(targetOffset.offset)) {
+            if (isSelfOpcode(targetOffset.offset, opcodeInfo)) {
                 continue;
             }
-            mFilteredResult.add(targetOffset);
+            result.add(targetOffset);
         }
-        end();
+        return result;
     }
 
-    private boolean isSelfOpcode(int offset) {
-        if (mOpcodeInfo == null || mOpcodeInfo.getVarOpcodeInfoHashMap() == null) {
+    private boolean isSelfOpcode(int offset, ByteCodeParser.OpcodeInfo opcodeInfo) {
+        if (opcodeInfo == null || opcodeInfo.getVarOpcodeInfoHashMap() == null) {
             return false;
         }
 
-        HashMap<Integer, ByteCodeParser.VarOpcodeInfo> varOpcodeInfoHashMap = mOpcodeInfo.getVarOpcodeInfoHashMap();
+        HashMap<Integer, ByteCodeParser.VarOpcodeInfo> varOpcodeInfoHashMap = opcodeInfo.getVarOpcodeInfoHashMap();
         if (!varOpcodeInfoHashMap.keySet().contains(offset)) {
             return false;
         }
@@ -77,19 +74,19 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
         return varOpcodeInfo.opcode == Opcodes.ALOAD && varOpcodeInfo.var == 0;
     }
 
-    private OpcodeInfoItem getTargetObjectOffset(int byteCodeOffset, ByteCodeParser.InvokeOpcodeInfo invokeOpcodeInfo) {
-        if (mOpcodeInfo == null || mOpcodeInfo.getGeneralOpcodeInfo() == null || invokeOpcodeInfo == null) {
+    private OpcodeInfoItem getTargetObjectOffset(int byteCodeOffset, ByteCodeParser.InvokeOpcodeInfo invokeOpcodeInfo, ByteCodeParser.OpcodeInfo opcodeInfo) {
+        if (opcodeInfo == null || opcodeInfo.getGeneralOpcodeInfo() == null || invokeOpcodeInfo == null) {
             return null;
         }
 
-        HashMap<Integer, ByteCodeParser.InvokeOpcodeInfo> infoHashMap = mOpcodeInfo.getInvokeOpcodeInfoHashMap();
+        HashMap<Integer, ByteCodeParser.InvokeOpcodeInfo> infoHashMap = opcodeInfo.getInvokeOpcodeInfoHashMap();
 
         if (infoHashMap == null) {
             return null;
         }
         List<String> params = ClassUtil.parseArguments(invokeOpcodeInfo.descriptor);
         OpcodeInfoItem result;
-        OpcodeInfoItem preOpcode = AnalyserUtil.getBeforeOpcodeInfo(mOpcodeInfo, byteCodeOffset);
+        OpcodeInfoItem preOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, byteCodeOffset);
         if (params == null || params.size() == 0) {//无参方法
             result = preOpcode;
         } else {
@@ -98,20 +95,20 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
             while (dealCount > 0) {
                 switch (AnalyserUtil.classifyOpcode(currOpcode.opcode)) {
                     case FIELD_TYPE:
-                        currOpcode = AnalyserUtil.getBeforeOpcodeInfo(mOpcodeInfo, AnalyserUtil.getBeforeOpcodeInfo(mOpcodeInfo, currOpcode.offset).offset);
+                        currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset).offset);
                         dealCount--;
                         break;
                     case LDC_TYPE:
                     case VARIABLE_TYPE:
                     case CONST_TYPE:
-                        currOpcode = AnalyserUtil.getBeforeOpcodeInfo(mOpcodeInfo, currOpcode.offset);
+                        currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset);
                         dealCount--;
                         break;
                     case INVOKE_TYPE:
                         while (AnalyserUtil.classifyOpcode(currOpcode.opcode) == INVOKE_TYPE) {
-                            currOpcode = getTargetObjectOffset(currOpcode.offset, infoHashMap.get(currOpcode.offset));
+                            currOpcode = getTargetObjectOffset(currOpcode.offset, infoHashMap.get(currOpcode.offset), opcodeInfo);
                         }
-                        currOpcode = AnalyserUtil.getBeforeOpcodeInfo(mOpcodeInfo, currOpcode.offset);
+                        currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset);
                         dealCount--;
                         break;
                     default:
@@ -125,12 +122,28 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
         return result;
     }
 
+    private void checkToStart() {
+        if (mOpcodeInfoList == null || mOpcodeInfoList.isEmpty()) {
+            end();
+            return;
+        }
+
+        if (mFilterdResults == null) {
+            mFilterdResults = new ArrayList<>();
+        }
+
+        for (ByteCodeParser.OpcodeInfo opcodeInfo : mOpcodeInfoList) {
+            mFilterdResults.add(AnalyserUtil.getAnalysisItem(opcodeInfo, filter(opcodeInfo)));
+        }
+        end();
+    }
+
     @Override
     public void start(@NonNull TaskBeanContract.ISimpleTaskInput input, @NonNull Listener<TaskBeanContract.ISimpleTaskOutput> listener) {
         mListener = listener;
-        mOpcodeInfo = input.getOpcodeInfo();
-        mFilteredResult = new ArrayList<>();
-        filter(mOpcodeInfo);
+        mOpcodeInfoList = input.getOpcodeInfoList();
+        mFilterdResults = new ArrayList<>();
+        checkToStart();
     }
 
     @Override
@@ -143,7 +156,7 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
     private @NonNull
     TaskBeanContract.ISimpleTaskOutput buildOutput() {
         return new SimpleTaskOutput.Builder()
-                .checkList(mFilteredResult)
+                .analysisList(mFilterdResults)
                 .build();
     }
 }

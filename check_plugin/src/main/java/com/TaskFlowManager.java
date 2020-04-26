@@ -1,15 +1,16 @@
 package com;
 
 import com.android.annotations.NonNull;
-import com.bytecode.parser.ByteCodeParser;
-import com.nullpointer.analysis.bean.OpcodeInfoItem;
+import com.bytecode.parser.tasks.BytecodeParserTask;
 import com.nullpointer.analysis.tasks.analyser.OpcodeAnalyser;
 import com.nullpointer.analysis.bean.input.SimpleTaskInput;
 import com.nullpointer.analysis.bean.output.SimpleTaskOutput;
 import com.nullpointer.analysis.tasks.filter.NonNullOpcodeFilter;
 import com.nullpointer.analysis.tasks.translator.OpcodeTranslator;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -20,10 +21,8 @@ import java.util.Queue;
  * @author guizhihong
  */
 public class TaskFlowManager implements ITaskFlowInstruction, TaskContract.AbstractTask.Listener<TaskBeanContract.ISimpleTaskOutput> {
-
-    private ByteCodeParser.OpcodeInfo mOpcodeInfo;
     private Queue<TaskContract.SimpleTask<TaskBeanContract.ISimpleTaskInput, TaskBeanContract.ISimpleTaskOutput>> mTaskQueue = new LinkedList<>();
-    private List<OpcodeInfoItem> mResult = new ArrayList<>();
+    private List<CommonOpcodeAnalysisItem> mResult = new ArrayList<>();
     private Callback mCallback;
 
     private SimpleTaskInput mInput;
@@ -36,11 +35,10 @@ public class TaskFlowManager implements ITaskFlowInstruction, TaskContract.Abstr
     }
 
     @Override
-    public void begin(ByteCodeParser.OpcodeInfo opcodeInfo) {
+    public void begin(Collection<File> classFileList) {
         mOutput = buildOutput();
-        mOpcodeInfo = opcodeInfo;
-        getInput().setCheckList(mResult);
-        getInput().setOpcodeInfo(opcodeInfo);
+        getInput().setAnalysisList(mResult);
+        getInput().setClassFiles(classFileList);
         checkToStart();
     }
 
@@ -53,6 +51,7 @@ public class TaskFlowManager implements ITaskFlowInstruction, TaskContract.Abstr
         if (mTaskQueue == null) {
             mTaskQueue = new LinkedList<>();
         }
+        mTaskQueue.add(new BytecodeParserTask());
         mTaskQueue.add(new NonNullOpcodeFilter());
         mTaskQueue.add(new OpcodeAnalyser());
         mTaskQueue.add(new OpcodeTranslator());
@@ -89,13 +88,18 @@ public class TaskFlowManager implements ITaskFlowInstruction, TaskContract.Abstr
 
     private SimpleTaskOutput buildOutput() {
         return new SimpleTaskOutput.Builder()
-                .checkList(mResult)
+                .analysisList(mResult)
                 .build();
     }
 
     @Override
     public void notifyEnd(@NonNull TaskBeanContract.ISimpleTaskOutput output) {
-        getInput().setCheckList(output.getCheckList());
+        if (output.getAnalysisList() != null) {
+            getInput().setAnalysisList(output.getAnalysisList());
+        }
+        if (output.getOpcodeInfoList() != null) {
+            getInput().setOpcodeInfoList(output.getOpcodeInfoList());
+        }
         mOutput = output;
         scheduleNextSimpleTask();
     }

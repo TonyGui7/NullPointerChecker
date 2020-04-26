@@ -2,8 +2,9 @@ package com;
 
 import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.AnalysisResultBean;
-import com.nullpointer.analysis.bean.OpcodeInfoItem;
 
+import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -13,24 +14,28 @@ import java.util.List;
  */
 public interface TaskBeanContract {
     interface IAtomicTaskInput {
-        ByteCodeParser.OpcodeInfo getOpcodeInfo();
+        List<ByteCodeParser.OpcodeInfo> getOpcodeInfoList();
 
-        void setOpcodeInfo(ByteCodeParser.OpcodeInfo opcodeInfo);
+        void setOpcodeInfoList(List<ByteCodeParser.OpcodeInfo> opcodeInfoList);
 
-        List<OpcodeInfoItem> getCheckList();
+        List<CommonOpcodeAnalysisItem> getAnalysisList();
 
-        void setCheckList(List<OpcodeInfoItem> checkList);
+        void setAnalysisList(List<CommonOpcodeAnalysisItem> checkList);
     }
 
     interface IAtomicTaskOutput {
-        List<OpcodeInfoItem> getCheckList();
+        List<CommonOpcodeAnalysisItem> getAnalysisList();
     }
 
     interface ISimpleTaskInput extends IAtomicTaskInput {
+        void setClassFiles(Collection<File> classFiles);
 
+        Collection<File> getClassFiles();
     }
 
     interface ISimpleTaskOutput extends IAtomicTaskOutput {
         List<AnalysisResultBean> getAnalysisResult();
+
+        List<ByteCodeParser.OpcodeInfo> getOpcodeInfoList();
     }
 }

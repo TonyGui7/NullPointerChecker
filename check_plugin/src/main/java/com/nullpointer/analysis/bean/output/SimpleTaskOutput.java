@@ -1,7 +1,8 @@
 package com.nullpointer.analysis.bean.output;
 
+import com.CommonOpcodeAnalysisItem;
+import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.AnalysisResultBean;
-import com.nullpointer.analysis.bean.OpcodeInfoItem;
 import com.TaskBeanContract;
 
 import java.util.List;
@@ -13,12 +14,14 @@ import java.util.List;
  */
 
 public class SimpleTaskOutput implements TaskBeanContract.ISimpleTaskOutput {
-    private List<OpcodeInfoItem> checkList;
+    private List<CommonOpcodeAnalysisItem> analysisList;
     private List<AnalysisResultBean> analysisResultBeanList;
+    private List<ByteCodeParser.OpcodeInfo> mOpcodeInfoList;
+
 
     @Override
-    public List<OpcodeInfoItem> getCheckList() {
-        return checkList;
+    public List<CommonOpcodeAnalysisItem> getAnalysisList() {
+        return analysisList;
     }
 
     @Override
@@ -26,12 +29,18 @@ public class SimpleTaskOutput implements TaskBeanContract.ISimpleTaskOutput {
         return analysisResultBeanList;
     }
 
-    public static class Builder {
-        private List<OpcodeInfoItem> list;
-        private List<AnalysisResultBean> analysisList;
+    @Override
+    public List<ByteCodeParser.OpcodeInfo> getOpcodeInfoList() {
+        return mOpcodeInfoList;
+    }
 
-        public Builder checkList(List<OpcodeInfoItem> checkList) {
-            this.list = checkList;
+    public static class Builder {
+        private List<CommonOpcodeAnalysisItem> list;
+        private List<AnalysisResultBean> analysisList;
+        private List<ByteCodeParser.OpcodeInfo> opcodeInfoList;
+
+        public Builder analysisList(List<CommonOpcodeAnalysisItem> analysisItemList) {
+            this.list = analysisItemList;
             return this;
         }
 
@@ -40,11 +49,16 @@ public class SimpleTaskOutput implements TaskBeanContract.ISimpleTaskOutput {
             return this;
         }
 
+        public Builder opcodeInfoList(List<ByteCodeParser.OpcodeInfo> opcodeInfoList) {
+            this.opcodeInfoList = opcodeInfoList;
+            return this;
+        }
 
         public SimpleTaskOutput build() {
             SimpleTaskOutput output = new SimpleTaskOutput();
-            output.checkList = list;
+            output.analysisList = list;
             output.analysisResultBeanList = analysisList;
+            output.mOpcodeInfoList = opcodeInfoList;
             return output;
         }
     }

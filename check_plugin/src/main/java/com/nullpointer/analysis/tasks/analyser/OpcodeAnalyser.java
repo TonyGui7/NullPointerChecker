@@ -1,5 +1,6 @@
 package com.nullpointer.analysis.tasks.analyser;
 
+import com.CommonOpcodeAnalysisItem;
 import com.android.annotations.NonNull;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
 import com.ITaskFlowInstruction;
@@ -44,17 +45,17 @@ public class OpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser<Task
             return;
         }
 
-        scheduleNextTask(mInput.getCheckList());
+        scheduleNextTask(mInput.getAnalysisList());
     }
 
-    private void scheduleNextTask(List<OpcodeInfoItem> opcodeInfoItems) {
+    private void scheduleNextTask(List<CommonOpcodeAnalysisItem> opcodeInfoItems) {
         if (mAnalyserTasks == null || mAnalyserTasks.isEmpty()) {
             end();
             return;
         }
 
         TaskContract.AtomicTask<TaskBeanContract.IAtomicTaskInput, TaskBeanContract.IAtomicTaskOutput> atomicTask = mAnalyserTasks.poll();
-        mInput.setCheckList(opcodeInfoItems);
+        mInput.setAnalysisList(opcodeInfoItems);
         atomicTask.start(mInput, this);
     }
 
@@ -90,12 +91,12 @@ public class OpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser<Task
 
     private SimpleTaskOutput buildOutput() {
         return new SimpleTaskOutput.Builder()
-                .checkList(mInput.getCheckList())
+                .analysisList(mInput.getAnalysisList())
                 .build();
     }
 
     @Override
     public void notifyEnd(@NonNull TaskBeanContract.IAtomicTaskOutput output) {
-        scheduleNextTask(output.getCheckList());
+        scheduleNextTask(output.getAnalysisList());
     }
 }

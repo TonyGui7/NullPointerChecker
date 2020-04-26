@@ -1,5 +1,6 @@
 package com.nullpointer.analysis.tasks.translator;
 
+import com.CommonOpcodeAnalysisItem;
 import com.android.annotations.NonNull;
 import com.bytecode.parser.ByteCodeParser;
 import com.ITaskFlowInstruction;
@@ -19,41 +20,48 @@ import java.util.TreeSet;
  * @author guizhihong
  */
 public class OpcodeTranslator implements ITaskFlowInstruction.IOpcodeTranslator<TaskBeanContract.ISimpleTaskInput, TaskBeanContract.ISimpleTaskOutput> {
-    private ByteCodeParser.OpcodeInfo mOpcodeInfo;
     private Listener<TaskBeanContract.ISimpleTaskOutput> mListener;
-    private List<OpcodeInfoItem> mProcessedInputList;
     private List<AnalysisResultBean> mResult;
+    private List<CommonOpcodeAnalysisItem> mAnalysedList;
 
     @Override
     public void start(@NonNull TaskBeanContract.ISimpleTaskInput iSimpleTaskInput, @NonNull Listener<TaskBeanContract.ISimpleTaskOutput> listener) {
-        mOpcodeInfo = iSimpleTaskInput.getOpcodeInfo();
-        mProcessedInputList = iSimpleTaskInput.getCheckList();
+        mAnalysedList = iSimpleTaskInput.getAnalysisList();
         mListener = listener;
         mResult = new ArrayList<>();
-        translate();
+        checkToStart();
     }
 
-    private void translate() {
-        if (mOpcodeInfo == null || mProcessedInputList == null || mProcessedInputList.isEmpty()) {
+    private void checkToStart() {
+        if (mAnalysedList == null || mAnalysedList.isEmpty()) {
             end();
             return;
         }
 
-        HashMap<Integer, Integer> lineNumberTable = mOpcodeInfo.getLineNumberTable();
+        for (CommonOpcodeAnalysisItem analysisItem : mAnalysedList) {
+            translate(analysisItem.getOpcodeInfo(), analysisItem.getCheckList());
+        }
+        end();
+    }
+
+    private void translate(ByteCodeParser.OpcodeInfo opcodeInfo, List<OpcodeInfoItem> analysedCheckList) {
+        if (opcodeInfo == null || analysedCheckList == null || analysedCheckList.isEmpty()) {
+            return;
+        }
+
+        HashMap<Integer, Integer> lineNumberTable = opcodeInfo.getLineNumberTable();
         if (lineNumberTable == null || lineNumberTable.isEmpty()) {
-            end();
             return;
         }
 
         TreeSet<Integer> lineNumberOffsetSet = new TreeSet<>(lineNumberTable.keySet());
-        for (OpcodeInfoItem infoItem : mProcessedInputList) {
+        for (OpcodeInfoItem infoItem : analysedCheckList) {
             if (lineNumberOffsetSet.floor(infoItem.offset) == null) {
                 continue;
             }
             int lineNumber = lineNumberTable.get(lineNumberOffsetSet.floor(infoItem.offset));
-            mResult.add(buildResultBean(mOpcodeInfo.getCurrClzzName(), mOpcodeInfo.getCurrMethodName(), lineNumber));
+            mResult.add(buildResultBean(opcodeInfo.getCurrClzzName(), opcodeInfo.getCurrMethodName(), lineNumber));
         }
-        end();
     }
 
     @Override

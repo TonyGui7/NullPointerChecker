@@ -16,12 +16,12 @@ import java.util.List;
  */
 public class FieldOpcodeAnalyser extends BaseOpcodeAnalyser {
     @Override
-    protected void analyseSpecificTypeOpcodes(OpcodeInfoItem checkNullOpcode, int jumpOffset, boolean isIfNull) {
-        if (mCheckList == null || checkNullOpcode == null || mOpcodeInfo == null) {
+    protected void analyseSpecificTypeOpcodes(OpcodeInfoItem checkNullOpcode, int jumpOffset, boolean isIfNull, ByteCodeParser.OpcodeInfo opcodeInfo, List<OpcodeInfoItem> checkList) {
+        if (checkList == null || checkNullOpcode == null || opcodeInfo == null) {
             return;
         }
 
-        HashMap<Integer, ByteCodeParser.FieldOpcodeInfo> fieldOpcodeInfoHashMap = mOpcodeInfo.getFieldOpcodeInfoHashMap();
+        HashMap<Integer, ByteCodeParser.FieldOpcodeInfo> fieldOpcodeInfoHashMap = opcodeInfo.getFieldOpcodeInfoHashMap();
         if (fieldOpcodeInfoHashMap == null || fieldOpcodeInfoHashMap.isEmpty()) {
             return;
         }
@@ -45,8 +45,8 @@ public class FieldOpcodeAnalyser extends BaseOpcodeAnalyser {
             if (fieldOpcodeInfo.equals(fieldOpcodeInfoHashMap.get(offset))) {
                 //删除作用域范围内的var指令信息，这些指令信息已判空
                 OpcodeInfoItem opcodeInfoItem = AnalyserUtil.constructOpcodeInfoItem(fieldOpcodeInfo.opcode, offset);
-                if (mCheckList.contains(opcodeInfoItem)) {
-                    mCheckList.remove(opcodeInfoItem);
+                if (checkList.contains(opcodeInfoItem)) {
+                    checkList.remove(opcodeInfoItem);
                 }
             }
         }

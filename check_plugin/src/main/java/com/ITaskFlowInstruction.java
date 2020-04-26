@@ -1,6 +1,11 @@
 package com;
 
 import com.bytecode.parser.ByteCodeParser;
+import com.nullpointer.analysis.bean.OpcodeInfoItem;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 整个空指针检测分析的任务流说明接口
@@ -22,9 +27,13 @@ public interface ITaskFlowInstruction {
 
     int DEFAULT_VALUE = -1;
 
+    interface IBytecodeParser<BInput, BOutput> extends TaskContract.SimpleTask<BInput, BOutput>{
+
+    }
+
     interface IOpcodeFilter<FInput, FOutput> extends TaskContract.SimpleTask<FInput, FOutput> {
 
-        void filter(ByteCodeParser.OpcodeInfo opcodeInfo);
+        List<OpcodeInfoItem> filter(ByteCodeParser.OpcodeInfo opcodeInfo);
     }
 
     interface IOpcodeAnalyser<AInput, AOutput> extends TaskContract.SimpleTask<AInput, AOutput> {
@@ -57,7 +66,7 @@ public interface ITaskFlowInstruction {
 
     void assembleTasks();
 
-    void begin(ByteCodeParser.OpcodeInfo opcodeInfo);
+    void begin(Collection<File> classFileList);
 
     void setCallback(Callback callback);
 

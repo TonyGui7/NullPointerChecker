@@ -1,9 +1,12 @@
 package com.nullpointer.analysis.tools;
 
+import com.CommonOpcodeAnalysisItem;
 import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
 
 import org.objectweb.asm.Opcodes;
+
+import java.util.List;
 
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.CAST_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.CONST_TYPE;
@@ -19,6 +22,13 @@ import static com.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
  * @author guizhihong
  */
 public class AnalyserUtil {
+
+    public static CommonOpcodeAnalysisItem getAnalysisItem(ByteCodeParser.OpcodeInfo opcodeInfo, List<OpcodeInfoItem> checkList) {
+        CommonOpcodeAnalysisItem analysisItem = new CommonOpcodeAnalysisItem();
+        analysisItem.setCheckList(checkList);
+        analysisItem.setOpcodeInfo(opcodeInfo);
+        return analysisItem;
+    }
 
     public static OpcodeInfoItem getBeforeOpcodeInfo(ByteCodeParser.OpcodeInfo opcodeInfo, int targetOffset) {
         if (opcodeInfo == null || opcodeInfo.getGeneralOpcodeInfo() == null) {
