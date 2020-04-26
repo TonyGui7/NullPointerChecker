@@ -1,7 +1,7 @@
 package com.nullpointer.analysis.tasks.analyser;
 
 import com.ITaskFlowInstruction;
-import com.nullpointer.analysis.bean.TaskBeanContract;
+import com.TaskBeanContract;
 
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.CAST_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;

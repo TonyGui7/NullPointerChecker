@@ -5,7 +5,7 @@ import com.bytecode.parser.ByteCodeParser;
 import com.ITaskFlowInstruction;
 import com.nullpointer.analysis.bean.AnalysisResultBean;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
-import com.nullpointer.analysis.bean.TaskBeanContract;
+import com.TaskBeanContract;
 import com.nullpointer.analysis.bean.output.SimpleTaskOutput;
 
 import java.util.ArrayList;

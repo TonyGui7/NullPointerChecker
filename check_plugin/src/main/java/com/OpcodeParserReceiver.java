@@ -1,10 +1,7 @@
 package com;
 
-import com.ITaskFlowInstruction;
-import com.TaskFlowManager;
 import com.bytecode.parser.ByteCodeParser;
 import com.bytecode.parser.IOpcodesParser;
-import com.nullpointer.analysis.bean.TaskBeanContract;
 
 /**
  * 字节码解析结果接受器

@@ -1,7 +1,6 @@
 package com;
 
 import com.bytecode.parser.ByteCodeParser;
-import com.nullpointer.analysis.bean.TaskBeanContract;
 
 /**
  * 整个空指针检测分析的任务流说明接口

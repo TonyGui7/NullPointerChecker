@@ -4,7 +4,7 @@ import com.android.annotations.NonNull;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
 import com.ITaskFlowInstruction;
 import com.nullpointer.analysis.bean.output.SimpleTaskOutput;
-import com.nullpointer.analysis.bean.TaskBeanContract;
+import com.TaskBeanContract;
 import com.TaskContract;
 
 import java.util.ArrayList;

@@ -6,7 +6,6 @@ import com.nullpointer.analysis.bean.OpcodeInfoItem;
 import com.nullpointer.analysis.tasks.analyser.OpcodeAnalyser;
 import com.nullpointer.analysis.bean.input.SimpleTaskInput;
 import com.nullpointer.analysis.bean.output.SimpleTaskOutput;
-import com.nullpointer.analysis.bean.TaskBeanContract;
 import com.nullpointer.analysis.tasks.filter.NonNullOpcodeFilter;
 import com.nullpointer.analysis.tasks.translator.OpcodeTranslator;
 

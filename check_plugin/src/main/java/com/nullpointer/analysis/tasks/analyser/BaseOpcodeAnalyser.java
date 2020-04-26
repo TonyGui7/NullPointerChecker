@@ -5,7 +5,7 @@ import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
 import com.ITaskFlowInstruction;
 import com.nullpointer.analysis.bean.output.SimpleTaskOutput;
-import com.nullpointer.analysis.bean.TaskBeanContract;
+import com.TaskBeanContract;
 import com.nullpointer.analysis.tools.AnalyserUtil;
 
 import org.objectweb.asm.Opcodes;

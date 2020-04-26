@@ -2,7 +2,7 @@ package com.nullpointer.analysis.bean.output;
 
 import com.nullpointer.analysis.bean.AnalysisResultBean;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
-import com.nullpointer.analysis.bean.TaskBeanContract;
+import com.TaskBeanContract;
 
 import java.util.List;
 

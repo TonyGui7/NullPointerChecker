@@ -1,6 +1,8 @@
-package com.nullpointer.analysis.bean;
+package com;
 
 import com.bytecode.parser.ByteCodeParser;
+import com.nullpointer.analysis.bean.AnalysisResultBean;
+import com.nullpointer.analysis.bean.OpcodeInfoItem;
 
 import java.util.List;
 
