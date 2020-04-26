@@ -54,7 +54,6 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
 
     private void analyseJumpOpcodeCase() {
         if (mOpcodeInfo == null) {
-            end();
             return;
         }
         HashMap<Integer, ByteCodeParser.JumpOpcodeInfo> jumpOpcodeInfoHashMap = mOpcodeInfo.getJumpOpcodeInfoList();
@@ -69,12 +68,10 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
 
     private void analyseInstanceOfOpcodeCase() {
         if (mOpcodeInfo == null) {
-            end();
             return;
         }
         HashMap<Integer, ByteCodeParser.InstanceOfOpcodeInfo> instanceOfOpcodeInfoHashMap = mOpcodeInfo.getInstanceOfOpcodeInfoHashMap();
         if (instanceOfOpcodeInfoHashMap == null || instanceOfOpcodeInfoHashMap.isEmpty()) {
-            end();
             return;
         }
 
