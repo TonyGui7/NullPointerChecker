@@ -1,4 +1,4 @@
-package com.bytecode.parser;
+package com.bytecode.parser.asm;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Label;

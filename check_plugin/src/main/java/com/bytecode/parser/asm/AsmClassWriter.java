@@ -1,4 +1,4 @@
-package com.bytecode.parser;
+package com.bytecode.parser.asm;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;

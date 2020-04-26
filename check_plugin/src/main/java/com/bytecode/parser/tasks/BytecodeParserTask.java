@@ -2,13 +2,11 @@ package com.bytecode.parser.tasks;
 
 import com.ITaskFlowInstruction;
 import com.TaskBeanContract;
-import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.ddmlib.Log;
-import com.bytecode.parser.ASMConfig;
-import com.bytecode.parser.AsmClassReader;
-import com.bytecode.parser.AsmClassVisitor;
-import com.bytecode.parser.AsmClassWriter;
+import com.bytecode.parser.asm.AsmClassReader;
+import com.bytecode.parser.asm.AsmClassVisitor;
+import com.bytecode.parser.asm.AsmClassWriter;
 import com.bytecode.parser.ByteCodeParser;
 import com.bytecode.parser.IOpcodesParser;
 import com.nullpointer.analysis.bean.output.SimpleTaskOutput;
@@ -50,7 +48,6 @@ public class BytecodeParserTask implements ITaskFlowInstruction.IBytecodeParser<
         }
         for (File file : mClassFiles) {
             processTargetClassFile(file);
-            System.out.println(" target file name: " + file.getAbsolutePath());
         }
         end();
     }

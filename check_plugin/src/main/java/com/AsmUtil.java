@@ -1,7 +1,7 @@
 package com;
 
 import com.android.SdkConstants;
-import com.bytecode.parser.ASMConfig;
+import com.bytecode.parser.asm.ASMConfig;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOCase;
