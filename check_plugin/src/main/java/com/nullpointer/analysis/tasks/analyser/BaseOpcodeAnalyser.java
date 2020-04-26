@@ -3,7 +3,7 @@ package com.nullpointer.analysis.tasks.analyser;
 import com.android.annotations.NonNull;
 import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
-import com.nullpointer.analysis.ITaskFlowInstruction;
+import com.ITaskFlowInstruction;
 import com.nullpointer.analysis.bean.output.SimpleTaskOutput;
 import com.nullpointer.analysis.bean.TaskBeanContract;
 import com.nullpointer.analysis.tools.AnalyserUtil;

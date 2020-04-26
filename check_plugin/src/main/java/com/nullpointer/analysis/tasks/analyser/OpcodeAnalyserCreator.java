@@ -1,13 +1,13 @@
 package com.nullpointer.analysis.tasks.analyser;
 
-import com.nullpointer.analysis.ITaskFlowInstruction;
+import com.ITaskFlowInstruction;
 import com.nullpointer.analysis.bean.TaskBeanContract;
 
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.CAST_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.INVOKE_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.LDC_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.CAST_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.INVOKE_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.LDC_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
 
 /**
  * 特定类型字节码指令分析器工厂

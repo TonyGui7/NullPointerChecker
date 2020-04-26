@@ -11,7 +11,7 @@ import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.ddmlib.Log
-import com.bytecode.parser.AsmUtil
+import com.AsmUtil
 import org.apache.commons.io.FileUtils
 
 import java.util.function.Consumer

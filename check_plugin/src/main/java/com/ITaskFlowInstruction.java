@@ -1,4 +1,4 @@
-package com.nullpointer.analysis;
+package com;
 
 import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.TaskBeanContract;

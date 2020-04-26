@@ -5,13 +5,13 @@ import com.nullpointer.analysis.bean.OpcodeInfoItem;
 
 import org.objectweb.asm.Opcodes;
 
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.CAST_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.CONST_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.INVOKE_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.LDC_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.RETURN_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.CAST_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.CONST_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.INVOKE_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.LDC_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.RETURN_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
 
 /**
  * 空指针分析器工具

@@ -1,4 +1,4 @@
-package com.nullpointer.analysis;
+package com;
 
 import com.android.annotations.NonNull;
 import com.bytecode.parser.ByteCodeParser;

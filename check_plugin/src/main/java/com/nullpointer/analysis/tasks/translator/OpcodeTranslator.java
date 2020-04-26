@@ -2,7 +2,7 @@ package com.nullpointer.analysis.tasks.translator;
 
 import com.android.annotations.NonNull;
 import com.bytecode.parser.ByteCodeParser;
-import com.nullpointer.analysis.ITaskFlowInstruction;
+import com.ITaskFlowInstruction;
 import com.nullpointer.analysis.bean.AnalysisResultBean;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
 import com.nullpointer.analysis.bean.TaskBeanContract;

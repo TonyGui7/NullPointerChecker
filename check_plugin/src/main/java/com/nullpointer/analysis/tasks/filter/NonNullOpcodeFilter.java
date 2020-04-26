@@ -4,7 +4,7 @@ import com.android.annotations.NonNull;
 import com.nullpointer.analysis.tools.ClassUtil;
 import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
-import com.nullpointer.analysis.ITaskFlowInstruction;
+import com.ITaskFlowInstruction;
 import com.nullpointer.analysis.bean.output.SimpleTaskOutput;
 import com.nullpointer.analysis.bean.TaskBeanContract;
 import com.nullpointer.analysis.tools.AnalyserUtil;
@@ -15,11 +15,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.CONST_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.INVOKE_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.LDC_TYPE;
-import static com.nullpointer.analysis.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.CONST_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.INVOKE_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.LDC_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
 
 /**
  * 过滤出需要进行空指针检测的字节码指令集
