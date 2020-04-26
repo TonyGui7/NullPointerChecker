@@ -119,7 +119,7 @@ public class AnalyserUtil {
             return RETURN_TYPE;
         }
 
-        if (opcode == Opcodes.NEW || opcode ==Opcodes.NEWARRAY || opcode == Opcodes.ANEWARRAY) {
+        if (opcode == Opcodes.NEW || opcode == Opcodes.NEWARRAY || opcode == Opcodes.ANEWARRAY) {
             return NEW_TYPE;
         }
 
@@ -131,6 +131,13 @@ public class AnalyserUtil {
             return false;
         }
         return "<init>".equals(invokeOpcodeInfo.name);
+    }
+
+    public static boolean isStaticBlockCode(ByteCodeParser.OpcodeInfo opcodeInfo) {
+        if (opcodeInfo == null) {
+            return false;
+        }
+        return "<clinit>".equals(opcodeInfo.getCurrMethodName());
     }
 
 

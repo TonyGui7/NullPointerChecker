@@ -140,6 +140,9 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
         }
 
         for (ByteCodeParser.OpcodeInfo opcodeInfo : mOpcodeInfoList) {
+            if (AnalyserUtil.isStaticBlockCode(opcodeInfo)) {//静态代码块不用判断
+                continue;
+            }
             mFilterdResults.add(AnalyserUtil.getAnalysisItem(opcodeInfo, filter(opcodeInfo)));
         }
         end();
