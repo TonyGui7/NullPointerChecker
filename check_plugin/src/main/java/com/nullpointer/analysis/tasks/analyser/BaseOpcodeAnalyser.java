@@ -89,12 +89,12 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
             case Opcodes.IFNULL:
             case Opcodes.IFNONNULL:
                 if (checkNullOpcodeInfo instanceof ByteCodeParser.JumpOpcodeInfo) {
-                    analyseNullChecker(targetOffset, ((ByteCodeParser.JumpOpcodeInfo) checkNullOpcodeInfo).jumpTargetOffset, checkNullOpcodeInfo.opcode == Opcodes.IFNULL);
+                    analyseIfTypeOpcode(targetOffset, ((ByteCodeParser.JumpOpcodeInfo) checkNullOpcodeInfo).jumpTargetOffset, checkNullOpcodeInfo.opcode == Opcodes.IFNULL);
                 }
                 break;
             case Opcodes.INSTANCEOF:
                 if (checkNullOpcodeInfo instanceof ByteCodeParser.InstanceOfOpcodeInfo) {
-                    analyseInstanceOfOpcode(targetOffset);
+                    analyseInstanceOfTypeOpcode(targetOffset);
                 }
                 break;
             default:
@@ -111,7 +111,7 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
      * @param jumpOffset
      * @param isIfNull
      */
-    private void analyseNullChecker(int targetOffset, int jumpOffset, boolean isIfNull) {
+    private void analyseIfTypeOpcode(int targetOffset, int jumpOffset, boolean isIfNull) {
         OpcodeInfoItem checkNullOpcodeInfo = AnalyserUtil.getBeforeOpcodeInfo(mOpcodeInfo, targetOffset);
         if (checkNullOpcodeInfo == null) {
             return;
@@ -125,7 +125,7 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
         analyseSpecificTypeOpcodes(checkNullOpcodeInfo, jumpOffset, isIfNull);
     }
 
-    private void analyseInstanceOfOpcode(int targetOffset) {
+    private void analyseInstanceOfTypeOpcode(int targetOffset) {
         OpcodeInfoItem checkNullOpcodeInfo = AnalyserUtil.getBeforeOpcodeInfo(mOpcodeInfo, targetOffset);
         if (checkNullOpcodeInfo == null) {
             return;
