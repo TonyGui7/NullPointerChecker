@@ -21,6 +21,8 @@ import com.nullpointer.analysis.bean.TaskBeanContract;
  */
 public interface ITaskFlowInstruction {
 
+    int DEFAULT_VALUE = -1;
+
     interface IOpcodeFilter<FInput, FOutput> extends TaskContract.SimpleTask<FInput, FOutput> {
 
         void filter(ByteCodeParser.OpcodeInfo opcodeInfo);

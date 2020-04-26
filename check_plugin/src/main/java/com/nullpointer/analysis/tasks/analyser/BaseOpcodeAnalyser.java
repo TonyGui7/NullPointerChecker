@@ -158,7 +158,7 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
 
     protected int getOpcodeIndexLessThan(int targetOffset, List<Integer> offsetList) {
         if (offsetList == null) {
-            return -1;
+            return ITaskFlowInstruction.DEFAULT_VALUE;
         }
 
         int index = offsetList.size() - 1;
@@ -169,12 +169,12 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
             }
         }
 
-        return -1;
+        return ITaskFlowInstruction.DEFAULT_VALUE;
     }
 
     protected int getOpcodeIndexGreaterThan(int targetOffset, List<Integer> offsetList) {
         if (offsetList == null) {
-            return -1;
+            return ITaskFlowInstruction.DEFAULT_VALUE;
         }
 
         int index = 0;
@@ -185,7 +185,7 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
             }
         }
 
-        return -1;
+        return ITaskFlowInstruction.DEFAULT_VALUE;
     }
 
     private SimpleTaskOutput buildOutput() {
