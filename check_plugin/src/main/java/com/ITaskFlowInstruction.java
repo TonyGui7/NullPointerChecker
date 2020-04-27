@@ -28,7 +28,7 @@ public interface ITaskFlowInstruction {
 
     int DEFAULT_VALUE = -1;
 
-    interface IBytecodeParser<BInput, BOutput> extends TaskContract.SimpleTask<BInput, BOutput>{
+    interface IBytecodeParser<BInput, BOutput> extends TaskContract.SimpleTask<BInput, BOutput> {
 
     }
 
@@ -43,7 +43,9 @@ public interface ITaskFlowInstruction {
             int[] ref();
         }
 
-        @IntRef(ref = {INVOKE_TYPE, FIELD_TYPE, VARIABLE_TYPE, CAST_TYPE, LDC_TYPE, RETURN_TYPE, CONST_TYPE})
+        @IntRef(ref = {INVOKE_TYPE, FIELD_TYPE, VARIABLE_TYPE, CAST_TYPE, LDC_TYPE, RETURN_TYPE, CONST_TYPE
+                , NEW_TYPE, ARRAY_TYPE, PUSH_TYPE, POP_TYPE, DUP_TYPE, SWAP_TYPE, ARITHMETIC_TYPE, CONVERT_TYPE, COMPARE_TYPE
+                , JUMP_TYPE, LOCK_TYPE, SWITCH_TYPE, EXCEPTION_TYPE})
         @interface OpcodeType {
         }
 
@@ -67,10 +69,6 @@ public interface ITaskFlowInstruction {
         int LOCK_TYPE = 18;
         int SWITCH_TYPE = 19;
         int EXCEPTION_TYPE = 20;
-
-
-
-
 
 
         interface IAtomicOpcodeAnalyser<AInput, AOutput> extends TaskContract.AtomicTask<AInput, AOutput> {
