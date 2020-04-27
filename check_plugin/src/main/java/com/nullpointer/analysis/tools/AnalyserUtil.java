@@ -1,6 +1,7 @@
 package com.nullpointer.analysis.tools;
 
 import com.CommonOpcodeAnalysisItem;
+import com.ITaskFlowInstruction;
 import com.bytecode.parser.ByteCodeParser;
 import com.bytecode.parser.IOpcodesParser;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
@@ -95,6 +96,7 @@ public class AnalyserUtil {
         return opcodeInfoItem;
     }
 
+    @ITaskFlowInstruction.IOpcodeAnalyser.OpcodeType
     public static int classifyOpcode(int opcode) {
         //TODO @guizhihong invokeDynamic指令
         if (opcode >= Opcodes.INVOKEVIRTUAL && opcode <= Opcodes.INVOKEINTERFACE) {
