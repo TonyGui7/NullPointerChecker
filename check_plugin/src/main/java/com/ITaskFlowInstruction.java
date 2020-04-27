@@ -55,6 +55,23 @@ public interface ITaskFlowInstruction {
         int RETURN_TYPE = 6;
         int CONST_TYPE = 7;
         int NEW_TYPE = 8;
+        int ARRAY_TYPE = 9;
+        int PUSH_TYPE = 10;
+        int POP_TYPE = 11;
+        int DUP_TYPE = 12;
+        int SWAP_TYPE = 13;
+        int ARITHMETIC_TYPE = 14;
+        int CONVERT_TYPE = 15;
+        int COMPARE_TYPE = 16;
+        int JUMP_TYPE = 17;
+        int LOCK_TYPE = 18;
+        int SWITCH_TYPE = 19;
+        int EXCEPTION_TYPE = 20;
+
+
+
+
+
 
         interface IAtomicOpcodeAnalyser<AInput, AOutput> extends TaskContract.AtomicTask<AInput, AOutput> {
 

@@ -9,13 +9,25 @@ import org.objectweb.asm.Opcodes;
 
 import java.util.List;
 
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.ARITHMETIC_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.ARRAY_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.CAST_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.COMPARE_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.CONST_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.CONVERT_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.DUP_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.EXCEPTION_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.INVOKE_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.JUMP_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.LDC_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.LOCK_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.NEW_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.POP_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.PUSH_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.RETURN_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.SWAP_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.SWITCH_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
 
 /**
@@ -89,11 +101,10 @@ public class AnalyserUtil {
             return INVOKE_TYPE;
         }
 
-        if (opcode == Opcodes.GETFIELD) {
+        if (opcode >= Opcodes.GETSTATIC && opcode <= Opcodes.PUTFIELD) {
             return FIELD_TYPE;
         }
 
-        //todo @guizhihong 加载局部变量的指令不止这些，需要进一步排查
         if (opcode >= Opcodes.ILOAD && opcode <= Opcodes.ALOAD) {
             return VARIABLE_TYPE;
         }
@@ -119,9 +130,59 @@ public class AnalyserUtil {
             return RETURN_TYPE;
         }
 
-        if (opcode == Opcodes.NEW || opcode == Opcodes.NEWARRAY || opcode == Opcodes.ANEWARRAY || opcode == Opcodes.MULTIANEWARRAY) {
+        if (opcode == Opcodes.NEW) {
             return NEW_TYPE;
         }
+
+        if (opcode >= Opcodes.NEWARRAY || opcode == Opcodes.ANEWARRAY || opcode == Opcodes.ARRAYLENGTH || opcode == Opcodes.MULTIANEWARRAY) {
+            return ARRAY_TYPE;
+        }
+
+        if (opcode == Opcodes.BIPUSH || opcode == Opcodes.SIPUSH) {
+            return PUSH_TYPE;
+        }
+
+        if (opcode == Opcodes.POP || opcode == Opcodes.POP2) {
+            return POP_TYPE;
+        }
+
+        if (opcode >= Opcodes.DUP && opcode <= Opcodes.DUP2_X2) {
+            return DUP_TYPE;
+        }
+
+        if (opcode == Opcodes.SWAP) {
+            return SWAP_TYPE;
+        }
+
+        if (opcode >= Opcodes.IADD && opcode <= Opcodes.IINC) {
+            return ARITHMETIC_TYPE;
+        }
+
+        if (opcode >= Opcodes.I2L && opcode <= Opcodes.I2S) {
+            return CONVERT_TYPE;
+        }
+
+        if (opcode >= Opcodes.LCMP && opcode <= Opcodes.DCMPG) {
+            return COMPARE_TYPE;
+        }
+
+        if (opcode >= Opcodes.IFEQ && opcode <= Opcodes.GOTO || opcode == Opcodes.IFNULL || opcode == Opcodes.IFNONNULL
+                || opcode == Opcodes.JSR || opcode == Opcodes.RET) {
+            return JUMP_TYPE;
+        }
+
+        if (opcode == Opcodes.MONITORENTER || opcode == Opcodes.MONITOREXIT) {
+            return LOCK_TYPE;
+        }
+
+        if (opcode == Opcodes.TABLESWITCH || opcode == Opcodes.LOOKUPSWITCH) {
+            return SWITCH_TYPE;
+        }
+
+        if (opcode == Opcodes.ATHROW) {
+            return EXCEPTION_TYPE;
+        }
+
 
         return 0;
     }
