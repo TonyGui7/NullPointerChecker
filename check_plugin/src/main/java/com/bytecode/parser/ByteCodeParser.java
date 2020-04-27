@@ -46,6 +46,8 @@ public class ByteCodeParser implements IOpcodesParser {
 
     private HashMap<Integer, InstanceOfOpcodeInfo> mInstanceOfOpcodeInfoMap;
 
+    private HashMap<Integer, MultiArrayOpcodeInfo> mMultiArrayOpcodeInfoHashMap;
+
     /**
      * 存储所有字节码指令及其对应的字节偏移量（相对当前栈帧）
      * key是当前指令字节偏移量
@@ -75,6 +77,7 @@ public class ByteCodeParser implements IOpcodesParser {
         mVarOpcodeInfoMap = new HashMap<>();
         mFieldOpcodeInfoMap = new HashMap<>();
         mInstanceOfOpcodeInfoMap = new HashMap<>();
+        mMultiArrayOpcodeInfoHashMap = new HashMap<>();
 
         if (mListener != null) {
             mListener.onParseStart();
@@ -92,6 +95,7 @@ public class ByteCodeParser implements IOpcodesParser {
         opcodeInfo.fieldOpcodeInfoHashMap = mFieldOpcodeInfoMap;
         opcodeInfo.invokeOpcodeInfoHashMap = mInvokeOpcodeInfoMap;
         opcodeInfo.instanceOfOpcodeInfoHashMap = mInstanceOfOpcodeInfoMap;
+        opcodeInfo.multiArrayOpcodeInfoHashMap = mMultiArrayOpcodeInfoHashMap;
 
         arrangeJumpOpcodeInfo();
         opcodeInfo.jumpOpcodeInfoMap = mJumpOpcodeLabelInfo;
@@ -530,6 +534,13 @@ public class ByteCodeParser implements IOpcodesParser {
         mInstanceOfOpcodeInfoMap.put(offset, new InstanceOfOpcodeInfo(opcode, type));
     }
 
+    public void cacheMultiArrayOpcodeInfo(int offset, int opcode, int dimension) {
+        if (mMultiArrayOpcodeInfoHashMap == null) {
+            return;
+        }
+        mMultiArrayOpcodeInfoHashMap.put(offset, new MultiArrayOpcodeInfo(opcode, dimension));
+    }
+
     public void cacheFieldOpcodeInfo(int offset, int opcode, String owner, String name, String descriptor) {
         if (mFieldOpcodeInfoMap == null) {
             return;
@@ -561,6 +572,8 @@ public class ByteCodeParser implements IOpcodesParser {
 
         private HashMap<Integer, InstanceOfOpcodeInfo> instanceOfOpcodeInfoHashMap;
 
+        private HashMap<Integer, MultiArrayOpcodeInfo> multiArrayOpcodeInfoHashMap;
+
         public String getCurrClzzName() {
             return currClzzName;
         }
@@ -591,6 +604,10 @@ public class ByteCodeParser implements IOpcodesParser {
 
         public HashMap<Integer, InstanceOfOpcodeInfo> getInstanceOfOpcodeInfoHashMap() {
             return instanceOfOpcodeInfoHashMap;
+        }
+
+        public HashMap<Integer, MultiArrayOpcodeInfo> getMultiArrayOpcodeInfoHashMap() {
+            return multiArrayOpcodeInfoHashMap;
         }
 
         public HashMap<Integer, Integer> getLineNumberTable() {
@@ -804,6 +821,37 @@ public class ByteCodeParser implements IOpcodesParser {
             return true;
         }
 
+    }
+
+    public class MultiArrayOpcodeInfo extends BaseOpcodeInfo {
+        public int dimension;
+
+        public MultiArrayOpcodeInfo(int opcode, int dimension) {
+            this.opcode = opcode;
+            this.dimension = dimension;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (!(object instanceof MultiArrayOpcodeInfo)) {
+                return false;
+            }
+
+            MultiArrayOpcodeInfo arrayOpcodeInfo = (MultiArrayOpcodeInfo) object;
+            if (arrayOpcodeInfo == this) {
+                return true;
+            }
+
+            if (this.opcode != arrayOpcodeInfo.opcode) {
+                return false;
+            }
+
+            if (this.dimension != arrayOpcodeInfo.dimension) {
+                return false;
+            }
+
+            return true;
+        }
     }
 
     public class BaseOpcodeInfo {

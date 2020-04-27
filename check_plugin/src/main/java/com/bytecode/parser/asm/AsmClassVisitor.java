@@ -309,6 +309,7 @@ public class AsmClassVisitor extends ClassVisitor {
         public void visitMultiANewArrayInsn(final String descriptor, final int numDimensions) {
             if (mByteCodeParser != null) {
                 mByteCodeParser.cacheGeneralByteCodeInfo(Opcodes.MULTIANEWARRAY, mCurrentBycodeOffset);
+                mByteCodeParser.cacheMultiArrayOpcodeInfo(mCurrentBycodeOffset, Opcodes.MULTIANEWARRAY, numDimensions);
                 mCurrentBycodeOffset = mByteCodeParser.parseOpcodeOffset(Opcodes.MULTIANEWARRAY, mCurrentBycodeOffset);
             }
             super.visitMultiANewArrayInsn(descriptor, numDimensions);
