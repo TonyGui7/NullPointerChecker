@@ -47,7 +47,7 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
 
         for (Integer offset : infoHashMap.keySet()) {
             ByteCodeParser.InvokeOpcodeInfo invokeOpcodeInfo = infoHashMap.get(offset);
-            if (invokeOpcodeInfo.opcode == Opcodes.INVOKESTATIC || invokeOpcodeInfo.opcode == Opcodes.INVOKEDYNAMIC || invokeOpcodeInfo.opcode == Opcodes.INVOKESPECIAL) {
+            if (invokeOpcodeInfo.opcode == Opcodes.INVOKESTATIC || invokeOpcodeInfo.opcode == Opcodes.INVOKEDYNAMIC || AnalyserUtil.isInvokeInit(invokeOpcodeInfo)) {
                 continue;
             }
             OpcodeInfoItem targetOffset = getTargetObjectOffset(offset, invokeOpcodeInfo, opcodeInfo);
@@ -86,10 +86,12 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
             return null;
         }
         List<String> params = ClassUtil.parseArguments(invokeOpcodeInfo.descriptor);
+        boolean isConstructor = AnalyserUtil.isInvokeInit(invokeOpcodeInfo);
+
         OpcodeInfoItem result;
         OpcodeInfoItem preOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, byteCodeOffset);
         if (params == null || params.size() == 0) {//无参方法
-            result = preOpcode;
+            result = isConstructor ? AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, preOpcode.offset) : preOpcode;
         } else {
             int dealCount = params.size();
             OpcodeInfoItem currOpcode = preOpcode;
@@ -104,17 +106,7 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
                         currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset);
                         break;
                     case INVOKE_TYPE:
-                        if (currOpcode.opcode == Opcodes.INVOKESPECIAL) {
-                            if (AnalyserUtil.isInvokeInit(infoHashMap.get(currOpcode.offset))) {
-                                currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset).offset);
-                            } else {
-                                currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset);
-                            }
-                        } else {
-                            while (AnalyserUtil.classifyOpcode(currOpcode.opcode) == INVOKE_TYPE) {
-                                currOpcode = getTargetObjectOffset(currOpcode.offset, infoHashMap.get(currOpcode.offset), opcodeInfo);
-                            }
-                        }
+                        currOpcode = getTargetObjectOffset(currOpcode.offset, infoHashMap.get(currOpcode.offset), opcodeInfo);
                         currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset);
                         break;
                     default:
@@ -122,7 +114,8 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
                 }
                 dealCount--;
             }
-            result = currOpcode;
+
+            result = isConstructor ? AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset) : currOpcode;
         }
 
 

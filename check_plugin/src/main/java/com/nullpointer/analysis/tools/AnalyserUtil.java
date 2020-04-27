@@ -119,7 +119,7 @@ public class AnalyserUtil {
             return RETURN_TYPE;
         }
 
-        if (opcode == Opcodes.NEW || opcode == Opcodes.NEWARRAY || opcode == Opcodes.ANEWARRAY) {
+        if (opcode == Opcodes.NEW || opcode == Opcodes.NEWARRAY || opcode == Opcodes.ANEWARRAY || opcode == Opcodes.MULTIANEWARRAY) {
             return NEW_TYPE;
         }
 
@@ -130,7 +130,7 @@ public class AnalyserUtil {
         if (invokeOpcodeInfo == null) {
             return false;
         }
-        return "<init>".equals(invokeOpcodeInfo.name);
+        return "<init>".equals(invokeOpcodeInfo.name) && invokeOpcodeInfo.opcode == Opcodes.INVOKESPECIAL;
     }
 
     public static boolean isStaticBlockCode(ByteCodeParser.OpcodeInfo opcodeInfo) {
