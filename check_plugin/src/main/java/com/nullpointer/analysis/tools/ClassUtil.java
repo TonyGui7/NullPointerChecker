@@ -18,6 +18,8 @@ public class ClassUtil {
     public final static String ARGUMENTS_TAG = "[L;]";
     public final static String RETURN_TAG = "[L;]";
 
+    public final static String ARRAY_FLAG = "\\[+";
+
     public static List<String> parseArguments(String descriptor) {
         Pattern pattern = Pattern.compile(OVERALL_TAG);
         String[] patternList = pattern.split(descriptor);
@@ -30,7 +32,12 @@ public class ClassUtil {
                     continue;
                 }
 
-                result.add(temp[index]);
+                if (temp[index].matches(ARRAY_FLAG) && index < temp.length - 1) {
+                    result.add(temp[index] + temp[index+1]);
+                    index++;
+                } else {
+                    result.add(temp[index]);
+                }
             }
         }
 
