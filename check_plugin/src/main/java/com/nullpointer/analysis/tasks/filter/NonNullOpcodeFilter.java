@@ -16,10 +16,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.ARRAY_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.CONST_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.INVOKE_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.LDC_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.PUSH_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.STATIC_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
 
 /**
@@ -87,11 +90,12 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
         }
         List<String> params = ClassUtil.parseArguments(invokeOpcodeInfo.descriptor);
         boolean isConstructor = AnalyserUtil.isInvokeInit(invokeOpcodeInfo);
+        boolean isInvokeStatic = invokeOpcodeInfo.opcode == Opcodes.INVOKESTATIC;
 
-        OpcodeInfoItem result;
+        OpcodeInfoItem result = AnalyserUtil.constructOpcodeInfoItem(invokeOpcodeInfo.opcode, byteCodeOffset);
         OpcodeInfoItem preOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, byteCodeOffset);
         if (params == null || params.size() == 0) {//无参方法
-            result = isConstructor ? AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, preOpcode.offset) : preOpcode;
+            result = isConstructor ? AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, preOpcode.offset) : (isInvokeStatic ? result : preOpcode);
         } else {
             int dealCount = params.size();
             OpcodeInfoItem currOpcode = preOpcode;
@@ -103,10 +107,16 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
                     case LDC_TYPE:
                     case VARIABLE_TYPE:
                     case CONST_TYPE:
+                    case PUSH_TYPE:
+                    case STATIC_TYPE:
                         currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset);
                         break;
                     case INVOKE_TYPE:
                         currOpcode = getTargetObjectOffset(currOpcode.offset, infoHashMap.get(currOpcode.offset), opcodeInfo);
+                        currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset);
+                        break;
+                    case ARRAY_TYPE:
+                        currOpcode = getTargetInvokeObjectOnArrayType(currOpcode.offset, AnalyserUtil.constructOpcodeInfoItem(currOpcode.opcode, currOpcode.offset), opcodeInfo);
                         currOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset);
                         break;
                     default:
@@ -115,9 +125,65 @@ public class NonNullOpcodeFilter implements ITaskFlowInstruction.IOpcodeFilter<T
                 dealCount--;
             }
 
-            result = isConstructor ? AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset) : currOpcode;
+            result = isConstructor ? AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, currOpcode.offset)
+                    : (isInvokeStatic ? AnalyserUtil.getAfterOpcodeInfo(opcodeInfo, currOpcode.offset) : currOpcode);
         }
 
+
+        return result;
+    }
+
+    private OpcodeInfoItem getTargetInvokeObjectOnArrayType(int byteCodeOffset, OpcodeInfoItem infoItem, ByteCodeParser.OpcodeInfo opcodeInfo) {
+        if (infoItem == null || AnalyserUtil.classifyOpcode(infoItem.opcode) != ARRAY_TYPE || opcodeInfo == null) {
+            return infoItem;
+        }
+
+        boolean isMultiArray = infoItem.opcode == Opcodes.MULTIANEWARRAY;
+        HashMap<Integer, ByteCodeParser.MultiArrayOpcodeInfo> multiArrayOpcodeInfoHashMap = opcodeInfo.getMultiArrayOpcodeInfoHashMap();
+        int paramCount = 0;
+        if (isMultiArray && multiArrayOpcodeInfoHashMap != null && !multiArrayOpcodeInfoHashMap.isEmpty()) {
+            paramCount = multiArrayOpcodeInfoHashMap.get(byteCodeOffset).dimension;
+        }
+
+        OpcodeInfoItem result;
+        OpcodeInfoItem preOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, byteCodeOffset);
+        if (paramCount == 0) {
+            result = preOpcode;
+        } else {
+            boolean isTakeNullOpcode = false;
+            while (paramCount > 0) {
+                if (isTakeNullOpcode) {
+                    preOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, preOpcode.offset);
+                }
+                switch (AnalyserUtil.classifyOpcode(preOpcode.opcode)) {
+                    case FIELD_TYPE:
+                        isTakeNullOpcode = false;
+                        preOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, preOpcode.offset);
+                        break;
+                    case LDC_TYPE:
+                    case VARIABLE_TYPE:
+                    case CONST_TYPE:
+                    case PUSH_TYPE:
+                    case STATIC_TYPE:
+                        isTakeNullOpcode = true;
+                        break;
+                    case INVOKE_TYPE:
+                        isTakeNullOpcode = false;
+                        HashMap<Integer, ByteCodeParser.InvokeOpcodeInfo> invokeOpcodeInfoHashMap = opcodeInfo.getInvokeOpcodeInfoHashMap();
+                        do {
+                            preOpcode = getTargetObjectOffset(preOpcode.offset, invokeOpcodeInfoHashMap.get(preOpcode.offset), opcodeInfo);
+                            //invokeStatic指令没有调用对象，对于无参数方法，返回当前指令；对于有参数方法，返回第一个参数加载的字节码指令
+                        } while (AnalyserUtil.classifyOpcode(preOpcode.opcode) == INVOKE_TYPE && preOpcode.opcode != Opcodes.INVOKESTATIC);
+                        preOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, preOpcode.offset);
+                        break;
+                    default:
+                        isTakeNullOpcode = false;
+                        break;
+                }
+                paramCount--;
+            }
+            result = preOpcode;
+        }
 
         return result;
     }

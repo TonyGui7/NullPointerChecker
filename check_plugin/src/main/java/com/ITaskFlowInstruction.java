@@ -45,7 +45,7 @@ public interface ITaskFlowInstruction {
 
         @IntRef(ref = {INVOKE_TYPE, FIELD_TYPE, VARIABLE_TYPE, CAST_TYPE, LDC_TYPE, RETURN_TYPE, CONST_TYPE
                 , NEW_TYPE, ARRAY_TYPE, PUSH_TYPE, POP_TYPE, DUP_TYPE, SWAP_TYPE, ARITHMETIC_TYPE, CONVERT_TYPE, COMPARE_TYPE
-                , JUMP_TYPE, LOCK_TYPE, SWITCH_TYPE, EXCEPTION_TYPE})
+                , JUMP_TYPE, LOCK_TYPE, SWITCH_TYPE, EXCEPTION_TYPE, ARRAY_LENGTH_TYPE, STATIC_TYPE})
         @interface OpcodeType {
         }
 
@@ -69,6 +69,8 @@ public interface ITaskFlowInstruction {
         int LOCK_TYPE = 18;
         int SWITCH_TYPE = 19;
         int EXCEPTION_TYPE = 20;
+        int ARRAY_LENGTH_TYPE = 21;
+        int STATIC_TYPE = 22;
 
 
         interface IAtomicOpcodeAnalyser<AInput, AOutput> extends TaskContract.AtomicTask<AInput, AOutput> {

@@ -11,6 +11,7 @@ import org.objectweb.asm.Opcodes;
 import java.util.List;
 
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.ARITHMETIC_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.ARRAY_LENGTH_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.ARRAY_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.CAST_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.COMPARE_TYPE;
@@ -27,6 +28,7 @@ import static com.ITaskFlowInstruction.IOpcodeAnalyser.NEW_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.POP_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.PUSH_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.RETURN_TYPE;
+import static com.ITaskFlowInstruction.IOpcodeAnalyser.STATIC_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.SWAP_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.SWITCH_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
@@ -103,8 +105,12 @@ public class AnalyserUtil {
             return INVOKE_TYPE;
         }
 
-        if (opcode >= Opcodes.GETSTATIC && opcode <= Opcodes.PUTFIELD) {
+        if (opcode >= Opcodes.GETFIELD && opcode <= Opcodes.PUTFIELD) {
             return FIELD_TYPE;
+        }
+
+        if (opcode == Opcodes.GETSTATIC || opcode == Opcodes.PUTSTATIC) {
+            return STATIC_TYPE;
         }
 
         if (opcode >= Opcodes.ILOAD && opcode <= Opcodes.ALOAD) {
@@ -136,8 +142,12 @@ public class AnalyserUtil {
             return NEW_TYPE;
         }
 
-        if (opcode >= Opcodes.NEWARRAY || opcode == Opcodes.ANEWARRAY || opcode == Opcodes.ARRAYLENGTH || opcode == Opcodes.MULTIANEWARRAY) {
+        if (opcode == Opcodes.NEWARRAY || opcode == Opcodes.ANEWARRAY || opcode == Opcodes.MULTIANEWARRAY) {
             return ARRAY_TYPE;
+        }
+
+        if (opcode == Opcodes.ARRAYLENGTH) {
+            return ARRAY_LENGTH_TYPE;
         }
 
         if (opcode == Opcodes.BIPUSH || opcode == Opcodes.SIPUSH) {
