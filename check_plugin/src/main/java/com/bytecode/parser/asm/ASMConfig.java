@@ -1,7 +1,7 @@
 package com.bytecode.parser.asm;
 
 public class ASMConfig {
-    public static String CLASS_NAME = "TextUtil";
+    public static String CLASS_NAME = "MainTest";
 
     public static String TARGET_CLASS = CLASS_NAME + ".class";
 
