@@ -291,6 +291,7 @@ public class AsmClassVisitor extends ClassVisitor {
                 final int min, final int max, final Label dflt, final Label... labels) {
             if (mByteCodeParser != null) {
                 mByteCodeParser.cacheGeneralByteCodeInfo(Opcodes.TABLESWITCH, mCurrentBycodeOffset);
+                mByteCodeParser.cacheSwitchOpcodeInfo(mCurrentBycodeOffset, Opcodes.TABLESWITCH, labels);
                 mCurrentBycodeOffset = mByteCodeParser.parseOpcodeOffset(Opcodes.TABLESWITCH, mCurrentBycodeOffset);
             }
             super.visitTableSwitchInsn(min, max, dflt, labels);
@@ -300,6 +301,7 @@ public class AsmClassVisitor extends ClassVisitor {
         public void visitLookupSwitchInsn(final Label dflt, final int[] keys, final Label[] labels) {
             if (mByteCodeParser != null) {
                 mByteCodeParser.cacheGeneralByteCodeInfo(Opcodes.LOOKUPSWITCH, mCurrentBycodeOffset);
+                mByteCodeParser.cacheSwitchOpcodeInfo(mCurrentBycodeOffset, Opcodes.LOOKUPSWITCH, labels);
                 mCurrentBycodeOffset = mByteCodeParser.parseOpcodeOffset(Opcodes.LOOKUPSWITCH, mCurrentBycodeOffset);
             }
             super.visitLookupSwitchInsn(dflt, keys, labels);
