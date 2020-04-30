@@ -118,4 +118,41 @@ public class MainTest {
         getObjectB().getNumber(new TestObjectA[5][TestObjectB.getStaticInteger(getText(), getObjectB())]);
 
     }
+
+    /**
+     * test switch opcode case
+     */
+    public void testSwitch() {
+        int result = 0;
+        switch (getObjectB().getNumber()) {
+            case 1:
+                result = 1;
+                break;
+            case 7:
+                result = 2;
+                break;
+            case 14:
+                result = 3;
+                break;
+            default:
+                result = 4;
+                break;
+        }
+
+        String text = "test";
+        switch (text) {
+            case "test":
+                text = "test";
+                break;
+            case "text":
+                text = "text";
+                break;
+            case "txt":
+                text = "txt";
+                break;
+            default:
+                text = "default";
+                break;
+        }
+    }
 }

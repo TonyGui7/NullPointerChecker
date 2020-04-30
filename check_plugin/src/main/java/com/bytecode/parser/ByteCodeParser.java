@@ -1,6 +1,9 @@
 package com.bytecode.parser;
 
+import com.ITaskFlowInstruction;
 import com.android.annotations.NonNull;
+import com.android.tools.r8.utils.T;
+import com.nullpointer.analysis.tools.AnalyserUtil;
 
 import org.jetbrains.annotations.Contract;
 import org.objectweb.asm.ConstantDynamic;
@@ -9,8 +12,11 @@ import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 通过Asm来解析所需的字节码信息，并将其按空指针检测与分析的目的进行分类存储
@@ -35,18 +41,27 @@ public class ByteCodeParser implements IOpcodesParser {
      * IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE, GOTO, JSR, IFNULL or IFNONNULL}
      */
     private HashMap<Integer, JumpOpcodeInfo> mJumpOpcodeLabelInfo;
+    private List<JumpOpcodeInfo> mJumpOpcodeCahce;
 
 
     private HashMap<Integer, InvokeOpcodeInfo> mInvokeOpcodeInfoMap;
+    private List<InvokeOpcodeInfo> mInvokeOpcodeCahce;
 
 
     private HashMap<Integer, VarOpcodeInfo> mVarOpcodeInfoMap;
+    private List<VarOpcodeInfo> mVarOpcodeCahce;
 
     private HashMap<Integer, FieldOpcodeInfo> mFieldOpcodeInfoMap;
+    private List<FieldOpcodeInfo> mFieldOpcodeCahce;
 
     private HashMap<Integer, InstanceOfOpcodeInfo> mInstanceOfOpcodeInfoMap;
+    private List<InstanceOfOpcodeInfo> mInstanceOfOpcodeCahce;
 
     private HashMap<Integer, MultiArrayOpcodeInfo> mMultiArrayOpcodeInfoHashMap;
+    private List<MultiArrayOpcodeInfo> mMultiArrayOpcodeCahce;
+
+    private HashMap<Integer, SwitchOpcodeInfo> mSwitchOpcodeInfoHashMap;
+    private List<SwitchOpcodeInfo> mSwitchOpcodeCahce;
 
     /**
      * 存储所有字节码指令及其对应的字节偏移量（相对当前栈帧）
@@ -56,6 +71,7 @@ public class ByteCodeParser implements IOpcodesParser {
     private List<Integer> mOpcodeOffsetList;
     private List<Integer> mOpcodeList;
 
+    private List<ISwitchOffsetListener> mSwitchOffsetListeners;
 
     private Listener mListener;
 
@@ -78,7 +94,9 @@ public class ByteCodeParser implements IOpcodesParser {
         mFieldOpcodeInfoMap = new HashMap<>();
         mInstanceOfOpcodeInfoMap = new HashMap<>();
         mMultiArrayOpcodeInfoHashMap = new HashMap<>();
+        mSwitchOpcodeInfoHashMap = new HashMap<>();
 
+        mSwitchOffsetListeners = new ArrayList<>();
         if (mListener != null) {
             mListener.onParseStart();
         }
@@ -90,6 +108,11 @@ public class ByteCodeParser implements IOpcodesParser {
         OpcodeInfo opcodeInfo = new OpcodeInfo();
         opcodeInfo.currClzzName = clzzName;
         opcodeInfo.currMethodName = methodName;
+
+        arrangeSwitchOpcodeInfo();
+        adjustBytecodeOffset();
+
+        opcodeInfo.switchOpcodeInfoHashMap = mSwitchOpcodeInfoHashMap;
         opcodeInfo.opcodeInfo = new GeneralOpcodeInfo(mOpcodeOffsetList, mOpcodeList);
         opcodeInfo.varOpcodeInfoHashMap = mVarOpcodeInfoMap;
         opcodeInfo.fieldOpcodeInfoHashMap = mFieldOpcodeInfoMap;
@@ -118,6 +141,158 @@ public class ByteCodeParser implements IOpcodesParser {
         }
     }
 
+    private void arrangeSwitchOpcodeInfo() {
+        if (mSwitchOpcodeInfoHashMap == null || mSwitchOpcodeInfoHashMap.isEmpty()) {
+            return;
+        }
+
+        Collection<SwitchOpcodeInfo> values = mSwitchOpcodeInfoHashMap.values();
+        for (SwitchOpcodeInfo switchOpcodeInfo : values) {
+            switchOpcodeInfo.releaseLabels();
+        }
+    }
+
+    private void adjustBytecodeOffset() {
+        if (mSwitchOpcodeInfoHashMap == null || mSwitchOpcodeInfoHashMap.isEmpty()) {
+            return;
+        }
+
+        if (mSwitchOffsetListeners == null || mSwitchOffsetListeners.isEmpty()) {
+            return;
+        }
+
+        List<Integer> switchOffsetList = new ArrayList<>(mSwitchOpcodeInfoHashMap.keySet());
+        Collections.sort(switchOffsetList);
+
+        List<Integer> baseLines = new ArrayList<>();
+        List<Integer> deltas = new ArrayList<>();
+        int deltaSum = 0;
+        for (Integer offset : switchOffsetList) {
+            SwitchOpcodeInfo switchOpcodeInfo = mSwitchOpcodeInfoHashMap.get(offset);
+            if (switchOpcodeInfo == null) {
+                continue;
+            }
+            int delta = switchOpcodeInfo.jumpOffset  - offset - deltaSum;
+            if (delta <= 0) {
+                continue;
+            }
+            deltaSum += delta;
+            baseLines.add(offset);
+            deltas.add(delta);
+        }
+
+        if (deltas.isEmpty() || baseLines.isEmpty()) {
+            return;
+        }
+
+        mJumpOpcodeCahce = new ArrayList<>();
+        mInvokeOpcodeCahce = new ArrayList<>();
+        mVarOpcodeCahce = new ArrayList<>();
+        mFieldOpcodeCahce = new ArrayList<>();
+        mInstanceOfOpcodeCahce = new ArrayList<>();
+        mMultiArrayOpcodeCahce = new ArrayList<>();
+        mSwitchOpcodeCahce = new ArrayList<>();
+
+
+        for (ISwitchOffsetListener listener : mSwitchOffsetListeners) {
+            listener.notifyOffset(deltas, baseLines);
+        }
+        mSwitchOffsetListeners.clear();
+
+
+        updateCache();
+
+        updateGeneralOpcodeOffset(deltas, baseLines);
+    }
+
+    private void updateCache() {
+        if (mInvokeOpcodeCahce != null && !mInvokeOpcodeCahce.isEmpty() && mInvokeOpcodeInfoMap != null) {
+            for (InvokeOpcodeInfo invokeOpcodeInfo : mInvokeOpcodeCahce) {
+                mInvokeOpcodeInfoMap.put(invokeOpcodeInfo.offset, invokeOpcodeInfo);
+            }
+            mInvokeOpcodeCahce.clear();
+        }
+
+        if (mJumpOpcodeCahce != null && !mJumpOpcodeCahce.isEmpty() && mJumpOpcodeLabelInfo != null) {
+            for (JumpOpcodeInfo jumpOpcodeInfo : mJumpOpcodeCahce) {
+                mJumpOpcodeLabelInfo.put(jumpOpcodeInfo.offset, jumpOpcodeInfo);
+            }
+            mJumpOpcodeCahce.clear();
+        }
+
+        if (mVarOpcodeCahce != null && !mVarOpcodeCahce.isEmpty() && mVarOpcodeInfoMap != null) {
+            for (VarOpcodeInfo varOpcodeInfo : mVarOpcodeCahce) {
+                mVarOpcodeInfoMap.put(varOpcodeInfo.offset, varOpcodeInfo);
+            }
+            mVarOpcodeCahce.clear();
+        }
+
+        if (mFieldOpcodeCahce != null && !mFieldOpcodeCahce.isEmpty() && mFieldOpcodeInfoMap != null) {
+            for (FieldOpcodeInfo fieldOpcodeInfo : mFieldOpcodeCahce) {
+                mFieldOpcodeInfoMap.put(fieldOpcodeInfo.offset, fieldOpcodeInfo);
+            }
+            mFieldOpcodeCahce.clear();
+        }
+        if (mInstanceOfOpcodeCahce != null && !mInstanceOfOpcodeCahce.isEmpty() && mInstanceOfOpcodeInfoMap != null) {
+            for (InstanceOfOpcodeInfo instanceOfOpcodeInfo : mInstanceOfOpcodeCahce) {
+                mInstanceOfOpcodeInfoMap.put(instanceOfOpcodeInfo.offset, instanceOfOpcodeInfo);
+            }
+            mInstanceOfOpcodeCahce.clear();
+        }
+        if (mMultiArrayOpcodeCahce != null && !mMultiArrayOpcodeCahce.isEmpty() && mMultiArrayOpcodeInfoHashMap != null) {
+            for (MultiArrayOpcodeInfo multiArrayOpcodeInfo : mMultiArrayOpcodeCahce) {
+                mMultiArrayOpcodeInfoHashMap.put(multiArrayOpcodeInfo.offset, multiArrayOpcodeInfo);
+            }
+            mMultiArrayOpcodeCahce.clear();
+        }
+        if (mSwitchOpcodeCahce != null && !mSwitchOpcodeCahce.isEmpty() && mSwitchOpcodeInfoHashMap != null) {
+            for (SwitchOpcodeInfo switchOpcodeInfo : mSwitchOpcodeCahce) {
+                mSwitchOpcodeInfoHashMap.put(switchOpcodeInfo.offset, switchOpcodeInfo);
+            }
+            mSwitchOpcodeCahce.clear();
+        }
+    }
+
+    private void updateGeneralOpcodeOffset(List<Integer> deltas, List<Integer> baseLines) {
+        if (!check(deltas, baseLines)) {
+            return;
+        }
+
+        for (int index = 0; index < mOpcodeOffsetList.size(); index++) {
+            int offset = mOpcodeOffsetList.get(index);
+            int delta = calculateDelta(offset, deltas, baseLines, AnalyserUtil.classifyOpcode(mOpcodeList.get(index)) == ITaskFlowInstruction.IOpcodeAnalyser.SWITCH_TYPE);
+            if (delta > 0) {
+                mOpcodeOffsetList.set(index, offset + delta);
+            }
+        }
+    }
+
+    private int calculateDelta(int targetOffset, List<Integer> deltas, List<Integer> baseLines, boolean isSwitchOpcode) {
+        int result = 0;
+        if (!check(deltas, baseLines)) {
+            return result;
+        }
+
+        for (int index = 0; index < baseLines.size(); index++) {
+            int baseLine = baseLines.get(index);
+            if (targetOffset > baseLine || (targetOffset == baseLine && !isSwitchOpcode)) {
+                result += deltas.get(index);
+            }
+        }
+
+        return result;
+    }
+
+    private boolean check(List<Integer> deltas, List<Integer> baseLines) {
+        if (deltas == null || baseLines == null || deltas.isEmpty() || baseLines.isEmpty()) {
+            return false;
+        }
+
+        if (deltas.size() != baseLines.size()) {
+            return false;
+        }
+        return true;
+    }
 
     public int parseLdcOpcode(Object object) {
         boolean isLongOrDouble = object instanceof Long || object instanceof Double;
@@ -408,14 +583,11 @@ public class ByteCodeParser implements IOpcodesParser {
 //                    result += 4;
 //                }
                 break;
-            case Opcodes.TABLESWITCH: {
-                // Skip 0 to 3 padding bytes.
-                // todo @guizhihong 暂不清楚该操作码指令的用途，另外该操作码指令的长度不定长
-                break;
-            }
+            case Opcodes.TABLESWITCH:
             case Opcodes.LOOKUPSWITCH:
-                // Skip 0 to 3 padding bytes.
-                // todo @guizhihong 暂不清楚该操作码指令的用途，另外该操作码指令的长度不定长
+                // 这这两个指令是switch分支语句生成的字节码指令，长度不定，
+                //因此在asm遍历class文件结束后，才可通过{@link Label#getOffset()}获取跳转位置，
+                //取最小跳转位置，即可计算出当前switch指令的长度
                 break;
             case Opcodes.ILOAD:
             case Opcodes.LLOAD:
@@ -505,7 +677,11 @@ public class ByteCodeParser implements IOpcodesParser {
 
     public void cacheJumpOpcodeInfo(int offset, int opcode, Label label) {
         if (mJumpOpcodeLabelInfo != null) {
-            mJumpOpcodeLabelInfo.put(offset, new JumpOpcodeInfo(opcode, label));
+            JumpOpcodeInfo jumpOpcodeInfo = new JumpOpcodeInfo(opcode, offset, label);
+            if (mSwitchOffsetListeners != null) {
+                mSwitchOffsetListeners.add(jumpOpcodeInfo);
+            }
+            mJumpOpcodeLabelInfo.put(offset, jumpOpcodeInfo);
         }
     }
 
@@ -514,39 +690,66 @@ public class ByteCodeParser implements IOpcodesParser {
         if (mInvokeOpcodeInfoMap == null) {
             return;
         }
-
-        mInvokeOpcodeInfoMap.put(offset, new InvokeOpcodeInfo(opcode, owner, name, descriptor, isInterface));
+        InvokeOpcodeInfo invokeOpcodeInfo = new InvokeOpcodeInfo(opcode, offset, owner, name, descriptor, isInterface);
+        if (mSwitchOffsetListeners != null) {
+            mSwitchOffsetListeners.add(invokeOpcodeInfo);
+        }
+        mInvokeOpcodeInfoMap.put(offset, invokeOpcodeInfo);
     }
 
     public void cacheVarOpcodeInfo(int offset, int opcode, int var) {
         if (mVarOpcodeInfoMap == null) {
             return;
         }
-
-        mVarOpcodeInfoMap.put(offset, new VarOpcodeInfo(opcode, var));
+        VarOpcodeInfo varOpcodeInfo = new VarOpcodeInfo(opcode, offset, var);
+        if (mSwitchOffsetListeners != null) {
+            mSwitchOffsetListeners.add(varOpcodeInfo);
+        }
+        mVarOpcodeInfoMap.put(offset, varOpcodeInfo);
     }
 
     public void cacheInstanceOfOpcodeInfo(int offset, int opcode, String type) {
         if (mInstanceOfOpcodeInfoMap == null) {
             return;
         }
-
-        mInstanceOfOpcodeInfoMap.put(offset, new InstanceOfOpcodeInfo(opcode, type));
+        InstanceOfOpcodeInfo instanceOfOpcodeInfo = new InstanceOfOpcodeInfo(opcode, offset, type);
+        if (mSwitchOffsetListeners != null) {
+            mSwitchOffsetListeners.add(instanceOfOpcodeInfo);
+        }
+        mInstanceOfOpcodeInfoMap.put(offset, instanceOfOpcodeInfo);
     }
 
     public void cacheMultiArrayOpcodeInfo(int offset, int opcode, int dimension) {
         if (mMultiArrayOpcodeInfoHashMap == null) {
             return;
         }
-        mMultiArrayOpcodeInfoHashMap.put(offset, new MultiArrayOpcodeInfo(opcode, dimension));
+        MultiArrayOpcodeInfo multiArrayOpcodeInfo = new MultiArrayOpcodeInfo(opcode, offset, dimension);
+        if (mSwitchOffsetListeners != null) {
+            mSwitchOffsetListeners.add(multiArrayOpcodeInfo);
+        }
+        mMultiArrayOpcodeInfoHashMap.put(offset, multiArrayOpcodeInfo);
+    }
+
+    public void cacheSwitchOpcodeInfo(int offset, int opcode, Label[] labels) {
+        if (mSwitchOpcodeInfoHashMap == null) {
+            return;
+        }
+        SwitchOpcodeInfo switchOpcodeInfo = new SwitchOpcodeInfo(opcode, offset, labels);
+        if (mSwitchOffsetListeners != null) {
+            mSwitchOffsetListeners.add(switchOpcodeInfo);
+        }
+        mSwitchOpcodeInfoHashMap.put(offset, switchOpcodeInfo);
     }
 
     public void cacheFieldOpcodeInfo(int offset, int opcode, String owner, String name, String descriptor) {
         if (mFieldOpcodeInfoMap == null) {
             return;
         }
-
-        mFieldOpcodeInfoMap.put(offset, new FieldOpcodeInfo(opcode, owner, name, descriptor));
+        FieldOpcodeInfo fieldOpcodeInfo = new FieldOpcodeInfo(opcode, offset, owner, name, descriptor);
+        if (mSwitchOffsetListeners != null) {
+            mSwitchOffsetListeners.add(fieldOpcodeInfo);
+        }
+        mFieldOpcodeInfoMap.put(offset, fieldOpcodeInfo);
     }
 
     public class OpcodeInfo {
@@ -573,6 +776,8 @@ public class ByteCodeParser implements IOpcodesParser {
         private HashMap<Integer, InstanceOfOpcodeInfo> instanceOfOpcodeInfoHashMap;
 
         private HashMap<Integer, MultiArrayOpcodeInfo> multiArrayOpcodeInfoHashMap;
+
+        private HashMap<Integer, SwitchOpcodeInfo> switchOpcodeInfoHashMap;
 
         public String getCurrClzzName() {
             return currClzzName;
@@ -608,6 +813,10 @@ public class ByteCodeParser implements IOpcodesParser {
 
         public HashMap<Integer, MultiArrayOpcodeInfo> getMultiArrayOpcodeInfoHashMap() {
             return multiArrayOpcodeInfoHashMap;
+        }
+
+        public HashMap<Integer, SwitchOpcodeInfo> getSwitchOpcodeInfoHashMap() {
+            return switchOpcodeInfoHashMap;
         }
 
         public HashMap<Integer, Integer> getLineNumberTable() {
@@ -647,12 +856,28 @@ public class ByteCodeParser implements IOpcodesParser {
         public String descriptor;
         public boolean isInterface;
 
-        public InvokeOpcodeInfo(int opcode, String owner, String name, String descriptor, boolean isInterface) {
+        public InvokeOpcodeInfo(int opcode, int offset, String owner, String name, String descriptor, boolean isInterface) {
             this.opcode = opcode;
+            this.offset = offset;
             this.owner = owner;
             this.name = name;
             this.descriptor = descriptor;
             this.isInterface = isInterface;
+        }
+
+        @Override
+        public void notifyOffset(List<Integer> deltas, List<Integer> baseLines) {
+            int delta = calculateDelta(offset, deltas, baseLines, false);
+            if (delta > 0 && mInvokeOpcodeInfoMap != null && !mInvokeOpcodeInfoMap.isEmpty()) {
+                if (!mInvokeOpcodeInfoMap.containsKey(offset)) {
+                    return;
+                }
+                mInvokeOpcodeInfoMap.remove(offset);
+                offset += delta;
+                if (mInvokeOpcodeCahce != null) {
+                    mInvokeOpcodeCahce.add(this);
+                }
+            }
         }
 
         @Contract(value = "null -> false", pure = true)
@@ -695,9 +920,25 @@ public class ByteCodeParser implements IOpcodesParser {
     public class VarOpcodeInfo extends BaseOpcodeInfo {
         public int var;
 
-        public VarOpcodeInfo(int opcode, int var) {
+        public VarOpcodeInfo(int opcode, int offset, int var) {
             this.opcode = opcode;
+            this.offset = offset;
             this.var = var;
+        }
+
+        @Override
+        public void notifyOffset(List<Integer> deltas, List<Integer> baseLines) {
+            int delta = calculateDelta(offset, deltas, baseLines, false);
+            if (delta > 0 && mVarOpcodeInfoMap != null && !mVarOpcodeInfoMap.isEmpty()) {
+                if (!mVarOpcodeInfoMap.containsKey(offset)) {
+                    return;
+                }
+                mVarOpcodeInfoMap.remove(offset);
+                offset += delta;
+                if (mVarOpcodeCahce != null) {
+                    mVarOpcodeCahce.add(this);
+                }
+            }
         }
 
         @Override
@@ -729,9 +970,11 @@ public class ByteCodeParser implements IOpcodesParser {
         //跳转指令满足条件跳转目标指令的字节偏移量
         public int jumpTargetOffset;
 
-        public JumpOpcodeInfo(int opcode, Label label) {
+        public JumpOpcodeInfo(int opcode, int offset, Label label) {
             this.opcode = opcode;
             this.label = label;
+            this.offset = offset;
+            mJumpOpcodeLabelInfo.containsValue(this);
         }
 
         public void releaseLabel() {
@@ -741,6 +984,21 @@ public class ByteCodeParser implements IOpcodesParser {
 
             jumpTargetOffset = label.getOffset();
             label = null;
+        }
+
+        @Override
+        public void notifyOffset(List<Integer> deltas, List<Integer> baseLines) {
+            int delta = calculateDelta(offset, deltas, baseLines, false);
+            if (delta > 0 && mJumpOpcodeLabelInfo != null && !mJumpOpcodeLabelInfo.isEmpty()) {
+                if (!mJumpOpcodeLabelInfo.containsKey(offset)) {
+                    return;
+                }
+                mJumpOpcodeLabelInfo.remove(offset);
+                offset += delta;
+                if (mJumpOpcodeCahce != null) {
+                    mJumpOpcodeCahce.add(this);
+                }
+            }
         }
 
     }
@@ -753,11 +1011,27 @@ public class ByteCodeParser implements IOpcodesParser {
         @NonNull
         public String descriptor;
 
-        public FieldOpcodeInfo(int opcode, String owner, String name, String descriptor) {
+        public FieldOpcodeInfo(int opcode, int offset, String owner, String name, String descriptor) {
             this.opcode = opcode;
+            this.offset = offset;
             this.owner = owner;
             this.name = name;
             this.descriptor = descriptor;
+        }
+
+        @Override
+        public void notifyOffset(List<Integer> deltas, List<Integer> baseLines) {
+            int delta = calculateDelta(offset, deltas, baseLines, false);
+            if (delta > 0 && mFieldOpcodeInfoMap != null && !mFieldOpcodeInfoMap.isEmpty()) {
+                if (!mFieldOpcodeInfoMap.containsKey(offset)) {
+                    return;
+                }
+                mFieldOpcodeInfoMap.remove(offset);
+                offset += delta;
+                if (mFieldOpcodeCahce != null) {
+                    mFieldOpcodeCahce.add(this);
+                }
+            }
         }
 
         @Override
@@ -794,9 +1068,25 @@ public class ByteCodeParser implements IOpcodesParser {
     public class InstanceOfOpcodeInfo extends BaseOpcodeInfo {
         public String type;
 
-        public InstanceOfOpcodeInfo(int opcode, String type) {
+        public InstanceOfOpcodeInfo(int opcode, int offset, String type) {
             this.opcode = opcode;
+            this.offset = offset;
             this.type = type;
+        }
+
+        @Override
+        public void notifyOffset(List<Integer> deltas, List<Integer> baseLines) {
+            int delta = calculateDelta(offset, deltas, baseLines, false);
+            if (delta > 0 && mInstanceOfOpcodeInfoMap != null && !mInstanceOfOpcodeInfoMap.isEmpty()) {
+                if (!mInstanceOfOpcodeInfoMap.containsKey(offset)) {
+                    return;
+                }
+                mInstanceOfOpcodeInfoMap.remove(offset);
+                offset += delta;
+                if (mInstanceOfOpcodeCahce != null) {
+                    mInstanceOfOpcodeCahce.add(this);
+                }
+            }
         }
 
         @Override
@@ -826,9 +1116,25 @@ public class ByteCodeParser implements IOpcodesParser {
     public class MultiArrayOpcodeInfo extends BaseOpcodeInfo {
         public int dimension;
 
-        public MultiArrayOpcodeInfo(int opcode, int dimension) {
+        public MultiArrayOpcodeInfo(int opcode, int offset, int dimension) {
             this.opcode = opcode;
+            this.offset = offset;
             this.dimension = dimension;
+        }
+
+        @Override
+        public void notifyOffset(List<Integer> deltas, List<Integer> baseLines) {
+            int delta = calculateDelta(offset, deltas, baseLines, false);
+            if (delta > 0 && mMultiArrayOpcodeInfoHashMap != null && !mMultiArrayOpcodeInfoHashMap.isEmpty()) {
+                if (!mMultiArrayOpcodeInfoHashMap.containsKey(offset)) {
+                    return;
+                }
+                mMultiArrayOpcodeInfoHashMap.remove(offset);
+                offset += delta;
+                if (mMultiArrayOpcodeCahce != null) {
+                    mMultiArrayOpcodeCahce.add(this);
+                }
+            }
         }
 
         @Override
@@ -854,8 +1160,77 @@ public class ByteCodeParser implements IOpcodesParser {
         }
     }
 
-    public class BaseOpcodeInfo {
+    public class SwitchOpcodeInfo extends BaseOpcodeInfo {
+        private Label[] labels;
+        public int jumpOffset;
+
+        public SwitchOpcodeInfo(int opcode, int offset, Label[] labels) {
+            this.opcode = opcode;
+            this.offset = offset;
+            this.labels = labels;
+        }
+
+        public void releaseLabels() {
+            if (this.labels == null || this.labels.length == 0) {
+                return;
+            }
+
+            jumpOffset = labels[0].getOffset();
+            for (Label label : labels) {
+                jumpOffset = Math.min(jumpOffset, label.getOffset());
+            }
+        }
+
+        @Override
+        public void notifyOffset(List<Integer> deltas, List<Integer> baseLines) {
+            int delta = calculateDelta(offset, deltas, baseLines, true);
+            if (delta > 0 && mSwitchOpcodeInfoHashMap != null && !mSwitchOpcodeInfoHashMap.isEmpty()) {
+                if (!mSwitchOpcodeInfoHashMap.containsKey(offset)) {
+                    return;
+                }
+                mSwitchOpcodeInfoHashMap.remove(offset);
+                offset += delta;
+                if (mSwitchOpcodeCahce != null) {
+                    mSwitchOpcodeCahce.add(this);
+                }
+            }
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (!(object instanceof SwitchOpcodeInfo)) {
+                return false;
+            }
+
+            SwitchOpcodeInfo switchOpcodeInfo = (SwitchOpcodeInfo) object;
+            if (this == object) {
+                return true;
+            }
+
+            if (this.opcode != switchOpcodeInfo.opcode) {
+                return false;
+            }
+
+            if (this.jumpOffset != switchOpcodeInfo.jumpOffset) {
+                return false;
+            }
+
+            return true;
+        }
+
+    }
+
+    public class BaseOpcodeInfo implements ISwitchOffsetListener {
         public int opcode;
+        public int offset;
+
+        @Override
+        public void notifyOffset(List<Integer> deltas, List<Integer> baseLines) {
+        }
+    }
+
+    interface ISwitchOffsetListener {
+        void notifyOffset(List<Integer> deltas, List<Integer> baseLines);
     }
 
 }
