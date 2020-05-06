@@ -1,4 +1,4 @@
-package com.nullpointer.analysis.tasks.analyser;
+package com.nullpointer.analysis.tasks.analyser.atomicAnalyser;
 
 import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;

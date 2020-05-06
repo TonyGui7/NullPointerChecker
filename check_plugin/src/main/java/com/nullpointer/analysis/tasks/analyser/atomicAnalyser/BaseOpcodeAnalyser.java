@@ -1,4 +1,4 @@
-package com.nullpointer.analysis.tasks.analyser;
+package com.nullpointer.analysis.tasks.analyser.atomicAnalyser;
 
 import com.CommonOpcodeAnalysisItem;
 import com.android.annotations.NonNull;
