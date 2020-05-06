@@ -172,7 +172,7 @@ public class ByteCodeParser implements IOpcodesParser {
             if (switchOpcodeInfo == null) {
                 continue;
             }
-            int delta = switchOpcodeInfo.jumpOffset  - offset - deltaSum;
+            int delta = switchOpcodeInfo.jumpOffset - offset - deltaSum;
             if (delta <= 0) {
                 continue;
             }
@@ -312,42 +312,7 @@ public class ByteCodeParser implements IOpcodesParser {
     }
 
     public int parseVarOpcode(int opcode, int var) {
-        int result = opcode;
-        if (var >= 0 && var <= 3) {
-            switch (opcode) {
-                case Opcodes.ILOAD:
-                    result = ILOAD_0 + var;
-                    break;
-                case Opcodes.LLOAD:
-                    result = LLOAD_0 + var;
-                    break;
-                case Opcodes.FLOAD:
-                    result = FLOAD_0 + var;
-                    break;
-                case Opcodes.DLOAD:
-                    result = DLOAD_0 + var;
-                    break;
-                case Opcodes.ALOAD:
-                    result = ALOAD_0 + var;
-                    break;
-                case Opcodes.ISTORE:
-                    result = ISTORE_0 + var;
-                    break;
-                case Opcodes.LSTORE:
-                    result = LSTORE_0 + var;
-                    break;
-                case Opcodes.FSTORE:
-                    result = FSTORE_0 + var;
-                    break;
-                case Opcodes.DSTORE:
-                    result = DSTORE_0 + var;
-                    break;
-                case Opcodes.ASTORE:
-                    result = ASTORE_0 + var;
-                    break;
-            }
-        }
-        return result;
+        return AnalyserUtil.parseVarOpcode(opcode, var);
     }
 
 

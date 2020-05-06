@@ -44,7 +44,7 @@ public class VariableOpcodeAnalyser extends BaseOpcodeAnalyser {
             int offset = offsetList.get(index);
             if (varOpcodeInfo.equals(varOpcodeInfoHashMap.get(offset))) {
                 //删除作用域范围内的var指令信息，这些指令信息已判空
-                OpcodeInfoItem opcodeInfoItem = AnalyserUtil.constructOpcodeInfoItem(varOpcodeInfo.opcode, offset);
+                OpcodeInfoItem opcodeInfoItem = AnalyserUtil.constructOpcodeInfoItem(AnalyserUtil.parseVarOpcode(varOpcodeInfo.opcode, varOpcodeInfo.var), offset);
                 if (checkList.contains(opcodeInfoItem)) {
                     checkList.remove(opcodeInfoItem);
                 }
