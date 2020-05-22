@@ -72,6 +72,23 @@ public class NPCheckProcessor extends AbstractProcessor {
         return SourceVersion.RELEASE_7;
     }
 
+    /**
+     * 生成如下格式的java文件
+     *
+     * <p>
+     * package com.npcheck.compiler.generated;
+     *
+     * public class NPCheckInfoManager {
+     *     public static List<String> initNPCheckInfo() {
+     *        List<String> classes = new ArrayList<>();
+     *        classes.add("1");
+     *        classes.add("2");
+     *        ...
+     *       return classes;
+     *    }
+     * }
+     * </>
+     */
     private void generateJavaFile(List<String> checkClasses) {
         if (checkClasses == null || checkClasses.isEmpty()) {
             return;
