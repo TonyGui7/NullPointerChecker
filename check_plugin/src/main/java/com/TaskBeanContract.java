@@ -31,11 +31,17 @@ public interface TaskBeanContract {
         void setClassFiles(Collection<File> classFiles);
 
         Collection<File> getClassFiles();
+
+        File getTransformFile();
+
+        void setTransformFile(File file);
     }
 
     interface ISimpleTaskOutput extends IAtomicTaskOutput {
         List<AnalysisResultBean> getAnalysisResult();
 
         List<ByteCodeParser.OpcodeInfo> getOpcodeInfoList();
+
+        Collection<File> getCheckFiles();
     }
 }

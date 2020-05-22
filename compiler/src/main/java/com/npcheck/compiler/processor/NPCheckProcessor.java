@@ -4,7 +4,11 @@ import com.google.auto.service.AutoService;
 import com.npcheck.compiler_interface.Consts;
 import com.npcheck.compiler_interface.NPClassCheck;
 import com.npcheck.compiler_interface.NotNullCheck;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -12,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -27,12 +32,14 @@ public class NPCheckProcessor extends AbstractProcessor {
 
     private Elements mElements;
     private Types mTypes;
+    private Filer mFiler;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
         mElements = processingEnvironment.getElementUtils();
         mTypes = processingEnvironment.getTypeUtils();
+        mFiler = processingEnvironment.getFiler();
     }
 
     @Override
@@ -70,8 +77,24 @@ public class NPCheckProcessor extends AbstractProcessor {
             return;
         }
 
+        ParameterizedTypeName parameterizedTypeName = ParameterizedTypeName.get(List.class, String.class);
         MethodSpec.Builder specBuilder = MethodSpec.methodBuilder(Consts.GN_METHOD_NAME)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(void.class);
+                .returns(parameterizedTypeName).addStatement(Consts.PARAMETER_VAR_INIT, parameterizedTypeName, ClassName.get(ArrayList.class));
+
+        for (String checkClass : checkClasses) {
+            specBuilder.addStatement(Consts.VAR_ADD_STRING, checkClass);
+        }
+        specBuilder.addStatement(Consts.RETURN_CHECK_CLASS);
+
+        try {
+            JavaFile.builder(Consts.PKG, TypeSpec.classBuilder(Consts.GN_CLASS_NAME)
+                    .addModifiers(Modifier.PUBLIC)
+                    .addMethod(specBuilder.build()).build())
+                    .build()
+                    .writeTo(mFiler);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

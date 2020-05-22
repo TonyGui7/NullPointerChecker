@@ -28,6 +28,10 @@ public interface ITaskFlowInstruction {
 
     int DEFAULT_VALUE = -1;
 
+    interface IAnnotationParser<AInput, AOutput> extends TaskContract.SimpleTask<AInput, AOutput> {
+
+    }
+
     interface IBytecodeParser<BInput, BOutput> extends TaskContract.SimpleTask<BInput, BOutput> {
 
     }
@@ -85,7 +89,7 @@ public interface ITaskFlowInstruction {
 
     void assembleTasks();
 
-    void begin(Collection<File> classFileList);
+    void begin(File transformFile);
 
     void setCallback(Callback callback);
 
