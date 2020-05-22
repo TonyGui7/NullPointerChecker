@@ -1,6 +1,8 @@
 package com.example.tonygui.nullpointercheck;
 
+import com.npcheck.compiler_interface.NPClassCheck;
 
+@NPClassCheck
 public class MainTest {
     /**
      * field

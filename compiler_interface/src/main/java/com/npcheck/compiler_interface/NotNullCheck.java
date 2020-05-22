@@ -1,4 +1,4 @@
-package com.npcheck.compiler.annotation;
+package com.npcheck.compiler_interface;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;

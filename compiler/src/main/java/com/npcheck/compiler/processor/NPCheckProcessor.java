@@ -1,8 +1,10 @@
 package com.npcheck.compiler.processor;
 
 import com.google.auto.service.AutoService;
-import com.npcheck.compiler.annotation.NPClassCheck;
-import com.npcheck.compiler.annotation.NotNullCheck;
+import com.npcheck.compiler_interface.Consts;
+import com.npcheck.compiler_interface.NPClassCheck;
+import com.npcheck.compiler_interface.NotNullCheck;
+import com.squareup.javapoet.MethodSpec;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -15,6 +17,7 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -40,6 +43,7 @@ public class NPCheckProcessor extends AbstractProcessor {
             checkClassNames.add(element.asType().toString());
         }
 
+        generateJavaFile(checkClassNames);
         // TODO: 2020-05-15  @guizhihong 针对注解NotNullCheck的信息处理
 //        Set<? extends Element> notNullElement = roundEnvironment.getElementsAnnotatedWith(NotNullCheck.class);
 //        for (Element element : notNullElement) {
@@ -59,5 +63,15 @@ public class NPCheckProcessor extends AbstractProcessor {
     @Override
     public SourceVersion getSupportedSourceVersion() {
         return SourceVersion.RELEASE_7;
+    }
+
+    private void generateJavaFile(List<String> checkClasses) {
+        if (checkClasses == null || checkClasses.isEmpty()) {
+            return;
+        }
+
+        MethodSpec.Builder specBuilder = MethodSpec.methodBuilder(Consts.GN_METHOD_NAME)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(void.class);
     }
 }
