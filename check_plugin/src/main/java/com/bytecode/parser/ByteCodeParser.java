@@ -206,50 +206,21 @@ public class ByteCodeParser implements IOpcodesParser {
     }
 
     private void updateCache() {
-        if (mInvokeOpcodeCahce != null && !mInvokeOpcodeCahce.isEmpty() && mInvokeOpcodeInfoMap != null) {
-            for (InvokeOpcodeInfo invokeOpcodeInfo : mInvokeOpcodeCahce) {
-                mInvokeOpcodeInfoMap.put(invokeOpcodeInfo.offset, invokeOpcodeInfo);
-            }
-            mInvokeOpcodeCahce.clear();
-        }
+        updateByteCodeCache(mInvokeOpcodeCahce, mInvokeOpcodeInfoMap);
+        updateByteCodeCache(mJumpOpcodeCahce, mJumpOpcodeLabelInfo);
+        updateByteCodeCache(mVarOpcodeCahce, mVarOpcodeInfoMap);
+        updateByteCodeCache(mFieldOpcodeCahce, mFieldOpcodeInfoMap);
+        updateByteCodeCache(mInstanceOfOpcodeCahce, mInstanceOfOpcodeInfoMap);
+        updateByteCodeCache(mMultiArrayOpcodeCahce, mMultiArrayOpcodeInfoHashMap);
+        updateByteCodeCache(mSwitchOpcodeCahce, mSwitchOpcodeInfoHashMap);
+    }
 
-        if (mJumpOpcodeCahce != null && !mJumpOpcodeCahce.isEmpty() && mJumpOpcodeLabelInfo != null) {
-            for (JumpOpcodeInfo jumpOpcodeInfo : mJumpOpcodeCahce) {
-                mJumpOpcodeLabelInfo.put(jumpOpcodeInfo.offset, jumpOpcodeInfo);
+    private <T extends BaseOpcodeInfo> void updateByteCodeCache(List<T> opcodeInfoCacheList, HashMap<Integer, T> opcodeInfoMap) {
+        if (opcodeInfoCacheList != null && !opcodeInfoCacheList.isEmpty() && opcodeInfoMap != null) {
+            for (T opcodeInfo : opcodeInfoCacheList) {
+                opcodeInfoMap.put(opcodeInfo.offset, opcodeInfo);
             }
-            mJumpOpcodeCahce.clear();
-        }
-
-        if (mVarOpcodeCahce != null && !mVarOpcodeCahce.isEmpty() && mVarOpcodeInfoMap != null) {
-            for (VarOpcodeInfo varOpcodeInfo : mVarOpcodeCahce) {
-                mVarOpcodeInfoMap.put(varOpcodeInfo.offset, varOpcodeInfo);
-            }
-            mVarOpcodeCahce.clear();
-        }
-
-        if (mFieldOpcodeCahce != null && !mFieldOpcodeCahce.isEmpty() && mFieldOpcodeInfoMap != null) {
-            for (FieldOpcodeInfo fieldOpcodeInfo : mFieldOpcodeCahce) {
-                mFieldOpcodeInfoMap.put(fieldOpcodeInfo.offset, fieldOpcodeInfo);
-            }
-            mFieldOpcodeCahce.clear();
-        }
-        if (mInstanceOfOpcodeCahce != null && !mInstanceOfOpcodeCahce.isEmpty() && mInstanceOfOpcodeInfoMap != null) {
-            for (InstanceOfOpcodeInfo instanceOfOpcodeInfo : mInstanceOfOpcodeCahce) {
-                mInstanceOfOpcodeInfoMap.put(instanceOfOpcodeInfo.offset, instanceOfOpcodeInfo);
-            }
-            mInstanceOfOpcodeCahce.clear();
-        }
-        if (mMultiArrayOpcodeCahce != null && !mMultiArrayOpcodeCahce.isEmpty() && mMultiArrayOpcodeInfoHashMap != null) {
-            for (MultiArrayOpcodeInfo multiArrayOpcodeInfo : mMultiArrayOpcodeCahce) {
-                mMultiArrayOpcodeInfoHashMap.put(multiArrayOpcodeInfo.offset, multiArrayOpcodeInfo);
-            }
-            mMultiArrayOpcodeCahce.clear();
-        }
-        if (mSwitchOpcodeCahce != null && !mSwitchOpcodeCahce.isEmpty() && mSwitchOpcodeInfoHashMap != null) {
-            for (SwitchOpcodeInfo switchOpcodeInfo : mSwitchOpcodeCahce) {
-                mSwitchOpcodeInfoHashMap.put(switchOpcodeInfo.offset, switchOpcodeInfo);
-            }
-            mSwitchOpcodeCahce.clear();
+            opcodeInfoCacheList.clear();
         }
     }
 
