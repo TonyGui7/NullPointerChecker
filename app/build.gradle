@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.example.pluginexplore'
+apply plugin: 'com.npcheck.plugin'
 
 android {
     compileSdkVersion 28
