@@ -29,8 +29,14 @@ uploadArchives {
             pom.groupId = 'com.npcheck'
             pom.artifactId = 'plugin'
             pom.version = '1.0.0'
-            //文件发布到下面目录
+            //文件发布到下面目录供本地测试
             repository(url: uri('../repo'))
+
+            //文件发布到maven仓库
+//            repository(url: 'http://localhost:8081/repository/gzh-res-hosted/') {
+//                // 你 Nexus 的账户密码
+//                authentication(userName: 'admin', password: 'INSIST2020gzh')
+//            }
         }
     }
 }
