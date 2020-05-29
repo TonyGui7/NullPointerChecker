@@ -16,12 +16,10 @@ targetCompatibility = "1.7"
 uploadArchives {
     repositories {
         mavenDeployer {
-            //设置插件的GAV参数
             pom.groupId = 'com.npcheck'
             pom.artifactId = 'compiler'
             pom.version = '1.0.0'
             repository(url: 'http://localhost:8081/repository/gzh-res-hosted/') {
-                // 你 Nexus 的账户密码
                 authentication(userName: 'admin', password: 'INSIST2020gzh')
             }
         }

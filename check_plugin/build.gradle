@@ -34,7 +34,6 @@ uploadArchives {
 
             //文件发布到maven仓库
 //            repository(url: 'http://localhost:8081/repository/gzh-res-hosted/') {
-//                // 你 Nexus 的账户密码
 //                authentication(userName: 'admin', password: 'INSIST2020gzh')
 //            }
         }
