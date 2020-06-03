@@ -1,5 +1,5 @@
 apply plugin: 'java-library'
-apply plugin: 'maven'
+apply from: "../maven.gradle"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -7,17 +7,3 @@ dependencies {
 
 sourceCompatibility = "7"
 targetCompatibility = "7"
-
-//设置maven deployer
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            pom.groupId = 'com.npcheck'
-            pom.artifactId = 'annotation'
-            pom.version = '1.0.0'
-            repository(url: 'http://localhost:8081/repository/gzh-res-hosted/') {
-                authentication(userName: 'admin', password: 'INSIST2020gzh')
-            }
-        }
-    }
-}

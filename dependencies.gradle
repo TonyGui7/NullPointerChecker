@@ -1,0 +1,11 @@
+ext {
+    Properties properties = new Properties();
+    properties.load(project.rootProject.file('./publish.properties').newDataInputStream())
+
+
+    toolsVersion = [
+            compilerVersion  : properties.getProperty("version"),
+            annotationVersion: properties.getProperty("version"),
+            pluginVersion    : properties.getProperty("version")
+    ]
+}

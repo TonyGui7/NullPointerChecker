@@ -1,27 +1,16 @@
+def tools = rootProject.ext.toolsVersion
+
 apply plugin: 'java-library'
-apply plugin: 'maven'
+apply from: "../maven.gradle"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     annotationProcessor 'com.google.auto.service:auto-service:1.0-rc6'
     implementation 'com.google.auto.service:auto-service:1.0-rc6'
     implementation 'com.squareup:javapoet:1.12.1'
-    implementation project(path: ':compiler_interface')
+//    implementation project(path: ':compiler_interface')
+    implementation "com.npcheck:annotations:${tools.annotationVersion}"
 }
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
-
-//设置maven deployer
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            pom.groupId = 'com.npcheck'
-            pom.artifactId = 'compiler'
-            pom.version = '1.0.0'
-            repository(url: 'http://localhost:8081/repository/gzh-res-hosted/') {
-                authentication(userName: 'admin', password: 'INSIST2020gzh')
-            }
-        }
-    }
-}

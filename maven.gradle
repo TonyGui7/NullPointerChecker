@@ -1,0 +1,21 @@
+apply plugin: 'maven'
+
+uploadArchives {
+    Properties properties = new Properties();
+    properties.load(project.rootProject.file('./publish.properties').newDataInputStream())
+    repositories {
+        mavenDeployer {
+            //设置插件的GAV参数
+            pom.groupId = properties.getProperty("group")
+            pom.artifactId = properties.getProperty("$project.name")
+            pom.version = properties.getProperty("version")
+            //文件发布到下面目录供本地测试
+//            repository(url: uri('../repo'))
+
+            //文件发布到maven仓库
+            repository(url: properties.getProperty("respository_url")) {
+                authentication(userName: properties.getProperty("user.name"), password: properties.getProperty("user.password"))
+            }
+        }
+    }
+}
