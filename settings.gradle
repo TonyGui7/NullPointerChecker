@@ -1,2 +1,2 @@
-include ':app'
+include ':app', ':compiler', ':compiler_interface'
 include ':check_plugin'

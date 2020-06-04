@@ -2,6 +2,10 @@ package com.nullpointer.analysis.tasks.analyser;
 
 import com.ITaskFlowInstruction;
 import com.TaskBeanContract;
+import com.nullpointer.analysis.tasks.analyser.atomicAnalyser.CastOpcodeAnalyser;
+import com.nullpointer.analysis.tasks.analyser.atomicAnalyser.FieldOpcodeAnalyser;
+import com.nullpointer.analysis.tasks.analyser.atomicAnalyser.InvokeOpcodeAnalyser;
+import com.nullpointer.analysis.tasks.analyser.atomicAnalyser.VariableOpcodeAnalyser;
 
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.CAST_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.FIELD_TYPE;

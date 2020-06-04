@@ -5,6 +5,8 @@ import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.AnalysisResultBean;
 import com.TaskBeanContract;
 
+import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -17,6 +19,7 @@ public class SimpleTaskOutput implements TaskBeanContract.ISimpleTaskOutput {
     private List<CommonOpcodeAnalysisItem> analysisList;
     private List<AnalysisResultBean> analysisResultBeanList;
     private List<ByteCodeParser.OpcodeInfo> mOpcodeInfoList;
+    private Collection<File> mCheckFiles;
 
 
     @Override
@@ -34,10 +37,16 @@ public class SimpleTaskOutput implements TaskBeanContract.ISimpleTaskOutput {
         return mOpcodeInfoList;
     }
 
+    @Override
+    public Collection<File> getCheckFiles() {
+        return mCheckFiles;
+    }
+
     public static class Builder {
         private List<CommonOpcodeAnalysisItem> list;
         private List<AnalysisResultBean> analysisList;
         private List<ByteCodeParser.OpcodeInfo> opcodeInfoList;
+        private Collection<File> checkFiles;
 
         public Builder analysisList(List<CommonOpcodeAnalysisItem> analysisItemList) {
             this.list = analysisItemList;
@@ -54,11 +63,17 @@ public class SimpleTaskOutput implements TaskBeanContract.ISimpleTaskOutput {
             return this;
         }
 
+        public Builder checkFiles(Collection<File> checkFiles) {
+            this.checkFiles = checkFiles;
+            return this;
+        }
+
         public SimpleTaskOutput build() {
             SimpleTaskOutput output = new SimpleTaskOutput();
             output.analysisList = list;
             output.analysisResultBeanList = analysisList;
             output.mOpcodeInfoList = opcodeInfoList;
+            output.mCheckFiles = checkFiles;
             return output;
         }
     }

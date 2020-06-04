@@ -32,6 +32,16 @@ import static com.ITaskFlowInstruction.IOpcodeAnalyser.STATIC_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.SWAP_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.SWITCH_TYPE;
 import static com.ITaskFlowInstruction.IOpcodeAnalyser.VARIABLE_TYPE;
+import static com.bytecode.parser.IOpcodesParser.ALOAD_0;
+import static com.bytecode.parser.IOpcodesParser.ASTORE_0;
+import static com.bytecode.parser.IOpcodesParser.DLOAD_0;
+import static com.bytecode.parser.IOpcodesParser.DSTORE_0;
+import static com.bytecode.parser.IOpcodesParser.FLOAD_0;
+import static com.bytecode.parser.IOpcodesParser.FSTORE_0;
+import static com.bytecode.parser.IOpcodesParser.ILOAD_0;
+import static com.bytecode.parser.IOpcodesParser.ISTORE_0;
+import static com.bytecode.parser.IOpcodesParser.LLOAD_0;
+import static com.bytecode.parser.IOpcodesParser.LSTORE_0;
 
 /**
  * 空指针分析器工具
@@ -117,7 +127,7 @@ public class AnalyserUtil {
             return VARIABLE_TYPE;
         }
 
-        if (opcode >= IOpcodesParser.ILOAD_0 && opcode <= IOpcodesParser.ALOAD_3) {
+        if (opcode >= ILOAD_0 && opcode <= IOpcodesParser.ALOAD_3) {
             return VARIABLE_TYPE;
         }
 
@@ -211,6 +221,46 @@ public class AnalyserUtil {
             return false;
         }
         return "<clinit>".equals(opcodeInfo.getCurrMethodName());
+    }
+
+
+    public static int parseVarOpcode(int opcode, int var) {
+        int result = opcode;
+        if (var >= 0 && var <= 3) {
+            switch (opcode) {
+                case Opcodes.ILOAD:
+                    result = ILOAD_0 + var;
+                    break;
+                case Opcodes.LLOAD:
+                    result = LLOAD_0 + var;
+                    break;
+                case Opcodes.FLOAD:
+                    result = FLOAD_0 + var;
+                    break;
+                case Opcodes.DLOAD:
+                    result = DLOAD_0 + var;
+                    break;
+                case Opcodes.ALOAD:
+                    result = ALOAD_0 + var;
+                    break;
+                case Opcodes.ISTORE:
+                    result = ISTORE_0 + var;
+                    break;
+                case Opcodes.LSTORE:
+                    result = LSTORE_0 + var;
+                    break;
+                case Opcodes.FSTORE:
+                    result = FSTORE_0 + var;
+                    break;
+                case Opcodes.DSTORE:
+                    result = DSTORE_0 + var;
+                    break;
+                case Opcodes.ASTORE:
+                    result = ASTORE_0 + var;
+                    break;
+            }
+        }
+        return result;
     }
 
 

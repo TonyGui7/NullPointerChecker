@@ -1,6 +1,7 @@
 package com;
 
 import com.android.annotations.NonNull;
+import com.annotation.parser.tasks.AnnotationParserTask;
 import com.bytecode.parser.tasks.BytecodeParserTask;
 import com.nullpointer.analysis.tasks.analyser.OpcodeAnalyser;
 import com.nullpointer.analysis.bean.input.SimpleTaskInput;
@@ -35,10 +36,10 @@ public class TaskFlowManager implements ITaskFlowInstruction, TaskContract.Abstr
     }
 
     @Override
-    public void begin(Collection<File> classFileList) {
+    public void begin(File transformFile) {
         mOutput = buildOutput();
         getInput().setAnalysisList(mResult);
-        getInput().setClassFiles(classFileList);
+        getInput().setTransformFile(transformFile);
         checkToStart();
     }
 
@@ -51,6 +52,7 @@ public class TaskFlowManager implements ITaskFlowInstruction, TaskContract.Abstr
         if (mTaskQueue == null) {
             mTaskQueue = new LinkedList<>();
         }
+        mTaskQueue.add(new AnnotationParserTask());
         mTaskQueue.add(new BytecodeParserTask());
         mTaskQueue.add(new NonNullOpcodeFilter());
         mTaskQueue.add(new OpcodeAnalyser());
@@ -96,6 +98,9 @@ public class TaskFlowManager implements ITaskFlowInstruction, TaskContract.Abstr
     public void notifyEnd(@NonNull TaskBeanContract.ISimpleTaskOutput output) {
         if (output.getAnalysisList() != null) {
             getInput().setAnalysisList(output.getAnalysisList());
+        }
+        if (output.getCheckFiles() != null) {
+            getInput().setClassFiles(output.getCheckFiles());
         }
         if (output.getOpcodeInfoList() != null) {
             getInput().setOpcodeInfoList(output.getOpcodeInfoList());

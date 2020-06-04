@@ -1,4 +1,4 @@
-package com.nullpointer.analysis.tasks.analyser;
+package com.nullpointer.analysis.tasks.analyser.atomicAnalyser;
 
 import com.CommonOpcodeAnalysisItem;
 import com.android.annotations.NonNull;
@@ -128,7 +128,8 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
         }
 
         OpcodeInfoItem returnOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, jumpOffset);
-        if (returnOpcode == null || AnalyserUtil.classifyOpcode(returnOpcode.opcode) != ITaskFlowInstruction.IOpcodeAnalyser.RETURN_TYPE) {
+        boolean isReturnCode = returnOpcode != null && AnalyserUtil.classifyOpcode(returnOpcode.opcode) == ITaskFlowInstruction.IOpcodeAnalyser.RETURN_TYPE;
+        if (!isIfNull && !isReturnCode) {
             return;
         }
 
@@ -154,7 +155,8 @@ public class BaseOpcodeAnalyser implements ITaskFlowInstruction.IOpcodeAnalyser.
         int jumpTargetOffset = jumpOpcodeInfoHashMap.get(eqOpcodeInfo.offset).jumpTargetOffset;
 
         OpcodeInfoItem returnOpcode = AnalyserUtil.getBeforeOpcodeInfo(opcodeInfo, jumpTargetOffset);
-        if (returnOpcode == null || AnalyserUtil.classifyOpcode(returnOpcode.opcode) != ITaskFlowInstruction.IOpcodeAnalyser.RETURN_TYPE) {
+        boolean isReturnCode = returnOpcode != null && AnalyserUtil.classifyOpcode(returnOpcode.opcode) == ITaskFlowInstruction.IOpcodeAnalyser.RETURN_TYPE;
+        if (!isIfNull && !isReturnCode) {
             return;
         }
 

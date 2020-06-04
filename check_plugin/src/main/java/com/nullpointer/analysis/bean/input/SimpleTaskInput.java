@@ -18,6 +18,7 @@ public class SimpleTaskInput implements TaskBeanContract.ISimpleTaskInput {
     private List<ByteCodeParser.OpcodeInfo> opcodeInfoList;
     private List<CommonOpcodeAnalysisItem> analysisList;
     private Collection<File> classFiles;
+    private File transformFile;
 
     @Override
     public List<ByteCodeParser.OpcodeInfo> getOpcodeInfoList() {
@@ -47,5 +48,15 @@ public class SimpleTaskInput implements TaskBeanContract.ISimpleTaskInput {
     @Override
     public Collection<File> getClassFiles() {
         return classFiles;
+    }
+
+    @Override
+    public File getTransformFile() {
+        return transformFile;
+    }
+
+    @Override
+    public void setTransformFile(File file) {
+        transformFile = file;
     }
 }

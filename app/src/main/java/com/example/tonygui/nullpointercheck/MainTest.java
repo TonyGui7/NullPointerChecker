@@ -1,6 +1,8 @@
 package com.example.tonygui.nullpointercheck;
 
+import com.npcheck.compiler_interface.NPClassCheck;
 
+@NPClassCheck
 public class MainTest {
     /**
      * field
@@ -117,21 +119,25 @@ public class MainTest {
         //new array with static invoke with two args
         getObjectB().getNumber(new TestObjectA[5][TestObjectB.getStaticInteger(getText(), getObjectB())]);
 
+        //todo @guizhihong 数组对象调用判空分析
+        TestObjectA[][] ar = new TestObjectA[8][23];
+        ar[2][3].equals(null);
     }
 
     /**
      * test switch opcode case
      */
     public void testSwitch() {
+        //test number
         int result = 0;
-        switch (getObjectB().getNumber()) {
-            case 1:
+        switch (result) {
+            case 5:
                 result = 1;
                 break;
-            case 7:
+            case 6:
                 result = 2;
                 break;
-            case 14:
+            case 7:
                 result = 3;
                 break;
             default:
@@ -139,20 +145,39 @@ public class MainTest {
                 break;
         }
 
+        //test String
         String text = "test";
-        switch (text) {
-            case "test":
-                text = "test";
+        if (text != null) {
+            switch (text) {
+                case "tes":
+                    text = "test";
+                    break;
+                case "text":
+                    text = "text";
+                    break;
+                case "txt":
+                    text = "txt";
+                    break;
+                default:
+                    text = "default";
+                    break;
+            }
+        }
+
+        EnumDemo demoCase = null;
+        if (demoCase == null) {
+            return;
+        }
+        switch (demoCase) {
+            case Demo1:
+                text = "测试case1";
+            case Demo2:
+                text = "测试case2";
                 break;
-            case "text":
-                text = "text";
-                break;
-            case "txt":
-                text = "txt";
-                break;
-            default:
-                text = "default";
+            case Demo3:
+                text = "测试case3";
                 break;
         }
+        text = "结束";
     }
 }

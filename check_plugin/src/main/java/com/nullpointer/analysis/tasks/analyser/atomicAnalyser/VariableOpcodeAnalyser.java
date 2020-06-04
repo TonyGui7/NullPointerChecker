@@ -1,4 +1,4 @@
-package com.nullpointer.analysis.tasks.analyser;
+package com.nullpointer.analysis.tasks.analyser.atomicAnalyser;
 
 import com.bytecode.parser.ByteCodeParser;
 import com.nullpointer.analysis.bean.OpcodeInfoItem;
@@ -10,28 +10,28 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * 成员变量类型字节码指令判断是否判空分析器
+ * 局部变量类型字节码指令判断是否判空分析器
  *
  * @author guizhihong
  */
-public class FieldOpcodeAnalyser extends BaseOpcodeAnalyser {
+public class VariableOpcodeAnalyser extends BaseOpcodeAnalyser {
     @Override
     protected void analyseSpecificTypeOpcodes(OpcodeInfoItem checkNullOpcode, int jumpOffset, boolean isIfNull, ByteCodeParser.OpcodeInfo opcodeInfo, List<OpcodeInfoItem> checkList) {
         if (checkList == null || checkNullOpcode == null || opcodeInfo == null) {
             return;
         }
 
-        HashMap<Integer, ByteCodeParser.FieldOpcodeInfo> fieldOpcodeInfoHashMap = opcodeInfo.getFieldOpcodeInfoHashMap();
-        if (fieldOpcodeInfoHashMap == null || fieldOpcodeInfoHashMap.isEmpty()) {
+        HashMap<Integer, ByteCodeParser.VarOpcodeInfo> varOpcodeInfoHashMap = opcodeInfo.getVarOpcodeInfoHashMap();
+        if (varOpcodeInfoHashMap == null || varOpcodeInfoHashMap.isEmpty()) {
             return;
         }
 
-        ByteCodeParser.FieldOpcodeInfo fieldOpcodeInfo = fieldOpcodeInfoHashMap.get(checkNullOpcode.offset);
-        if (fieldOpcodeInfo == null) {
+        ByteCodeParser.VarOpcodeInfo varOpcodeInfo = varOpcodeInfoHashMap.get(checkNullOpcode.offset);
+        if (varOpcodeInfo == null) {
             return;
         }
 
-        List<Integer> offsetList = new ArrayList<>(fieldOpcodeInfoHashMap.keySet());
+        List<Integer> offsetList = new ArrayList<>(varOpcodeInfoHashMap.keySet());
         Collections.sort(offsetList);
 
         int startIndex = isIfNull ? offsetList.indexOf(checkNullOpcode.offset) + 1 : getOpcodeIndexGreaterThan(jumpOffset, offsetList);
@@ -42,13 +42,15 @@ public class FieldOpcodeAnalyser extends BaseOpcodeAnalyser {
 
         for (int index = startIndex; index < endIndex; index++) {
             int offset = offsetList.get(index);
-            if (fieldOpcodeInfo.equals(fieldOpcodeInfoHashMap.get(offset))) {
+            if (varOpcodeInfo.equals(varOpcodeInfoHashMap.get(offset))) {
                 //删除作用域范围内的var指令信息，这些指令信息已判空
-                OpcodeInfoItem opcodeInfoItem = AnalyserUtil.constructOpcodeInfoItem(fieldOpcodeInfo.opcode, offset);
+                OpcodeInfoItem opcodeInfoItem = AnalyserUtil.constructOpcodeInfoItem(AnalyserUtil.parseVarOpcode(varOpcodeInfo.opcode, varOpcodeInfo.var), offset);
                 if (checkList.contains(opcodeInfoItem)) {
                     checkList.remove(opcodeInfoItem);
                 }
             }
         }
+
+
     }
 }
