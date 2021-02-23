@@ -53,7 +53,7 @@ public class AnnotationParserTask implements ITaskFlowInstruction.IAnnotationPar
             AptClassVisitor classVisitor = new AptClassVisitor(classWriter, this);
             classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES);
         } catch (Exception e) {
-            e.printStackTrace();
+            end();
         }
     }
 
