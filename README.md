@@ -45,4 +45,4 @@ implementation 'com.npcheck:annotations:1.0.3'
 
 在您想检测的java类添加@NPClassCheck注解，在编译时即可对该类进行检测。
 检测结果直接在android studio控制台打印出来，如下图
-https://github.com/TonyGui7/NullPointerChecker/blob/master/document_res/demoResult.jpg
+![](https://github.com/TonyGui7/NullPointerChecker/blob/master/document_res/demoResult.jpg)
